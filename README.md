@@ -11,7 +11,7 @@ TODO: Add usage example
   official [SignalR client for Java](https://github.com/dotnet/aspnetcore/tree/main/src/SignalR/clients/java/signalr)
   by Microsoft.
 
-## Limitations
+# Limitations
 
 - Currently only works on android
 - Currently only supports websocket transport
