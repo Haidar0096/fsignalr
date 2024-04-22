@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fsignalr/fsignalr.dart';
-import 'package:fsignalr/fsignalr_platform_interface.dart';
-import 'package:fsignalr/fsignalr_method_channel.dart';
+import 'package:fsignalr/src/fsignalr.dart';
+import 'package:fsignalr/src/fsignalr_method_channel.dart';
+import 'package:fsignalr/src/fsignalr_platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 class MockFsignalrPlatform
