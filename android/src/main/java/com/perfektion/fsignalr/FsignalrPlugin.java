@@ -2,37 +2,34 @@ package com.perfektion.fsignalr;
 
 import androidx.annotation.NonNull;
 
+import com.perfektion.fsignalr.FsignalrPigeons.FsignalrApi;
+import com.perfektion.fsignalr.FsignalrPigeons.PlatformVersionResult;
+
+import java.util.Calendar;
+
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
-import io.flutter.plugin.common.MethodCall;
-import io.flutter.plugin.common.MethodChannel;
-import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
-import io.flutter.plugin.common.MethodChannel.Result;
 
-/** FsignalrPlugin */
-public class FsignalrPlugin implements FlutterPlugin, MethodCallHandler {
-  /// The MethodChannel that will the communication between Flutter and native Android
-  ///
-  /// This local reference serves to register the plugin with the Flutter Engine and unregister it
-  /// when the Flutter Engine is detached from the Activity
-  private MethodChannel channel;
-
-  @Override
-  public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-    channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "fsignalr");
-    channel.setMethodCallHandler(this);
-  }
-
-  @Override
-  public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
-    if (call.method.equals("getPlatformVersion")) {
-      result.success("Android " + android.os.Build.VERSION.RELEASE);
-    } else {
-      result.notImplemented();
+/**
+ * FsignalrPlugin
+ */
+public class FsignalrPlugin implements FlutterPlugin, FsignalrApi {
+    @Override
+    public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
+        FsignalrApi.setUp(flutterPluginBinding.getBinaryMessenger(), this);
     }
-  }
 
-  @Override
-  public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
-    channel.setMethodCallHandler(null);
-  }
+    @Override
+    public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
+        FsignalrApi.setUp(binding.getBinaryMessenger(), null);
+    }
+
+    @Override
+    public void getPlatformVersion(@NonNull FsignalrPigeons.NullableResult<PlatformVersionResult> result) {
+        final String platformVersionString = "Android " + android.os.Build.VERSION.RELEASE + " detected at " + Calendar.getInstance().getTime();
+        final PlatformVersionResult successResult = new PlatformVersionResult
+                .Builder()
+                .setPlatformVersion(platformVersionString)
+                .build();
+        result.success(successResult);
+    }
 }

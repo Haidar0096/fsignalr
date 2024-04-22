@@ -1,6 +1,5 @@
+import 'package:fsignalr/src/pigeons_fsignalr_platform_interface_impl.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
-
-import 'fsignalr_method_channel.dart';
 
 abstract class FsignalrPlatform extends PlatformInterface {
   /// Constructs a FsignalrPlatform.
@@ -8,11 +7,11 @@ abstract class FsignalrPlatform extends PlatformInterface {
 
   static final Object _token = Object();
 
-  static FsignalrPlatform _instance = MethodChannelFsignalr();
+  static FsignalrPlatform _instance = PigeonsFsignalrPlatform();
 
   /// The default instance of [FsignalrPlatform] to use.
   ///
-  /// Defaults to [MethodChannelFsignalr].
+  /// Defaults to [MethodChannelFsignalrImpl].
   static FsignalrPlatform get instance => _instance;
 
   /// Platform-specific implementations should set this with their own

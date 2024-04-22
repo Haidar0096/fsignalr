@@ -1,0 +1,1 @@
+dart run pigeon --input pigeons/fsignalr_pigeons.dart
