@@ -15,48 +15,14 @@ PlatformException _createConnectionError(String channelName) {
   );
 }
 
-class PlatformVersionResult {
-  PlatformVersionResult({
-    required this.platformVersion,
-  });
-
-  String platformVersion;
-
-  Object encode() {
-    return <Object?>[
-      platformVersion,
-    ];
-  }
-
-  static PlatformVersionResult decode(Object result) {
-    result as List<Object?>;
-    return PlatformVersionResult(
-      platformVersion: result[0]! as String,
-    );
-  }
-}
-
-class _FsignalrApiCodec extends StandardMessageCodec {
-  const _FsignalrApiCodec();
-  @override
-  void writeValue(WriteBuffer buffer, Object? value) {
-    if (value is PlatformVersionResult) {
-      buffer.putUint8(128);
-      writeValue(buffer, value.encode());
-    } else {
-      super.writeValue(buffer, value);
-    }
-  }
-
-  @override
-  Object? readValueOfType(int type, ReadBuffer buffer) {
-    switch (type) {
-      case 128: 
-        return PlatformVersionResult.decode(readValue(buffer)!);
-      default:
-        return super.readValueOfType(type, buffer);
-    }
-  }
+/// Used to specify the transport the client will use.
+enum TransportType {
+  /// The client will use any available transport.
+  all,
+  /// The client will use WebSockets to communicate with the server.
+  webSockets,
+  /// The client will use Long Polling to communicate with the server.
+  longPolling,
 }
 
 class FsignalrApi {
@@ -68,19 +34,19 @@ class FsignalrApi {
         __pigeon_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
   final BinaryMessenger? __pigeon_binaryMessenger;
 
-  static const MessageCodec<Object?> pigeonChannelCodec = _FsignalrApiCodec();
+  static const MessageCodec<Object?> pigeonChannelCodec = StandardMessageCodec();
 
   final String __pigeon_messageChannelSuffix;
 
-  Future<PlatformVersionResult?> getPlatformVersion() async {
-    final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.FsignalrApi.getPlatformVersion$__pigeon_messageChannelSuffix';
+  Future<void> createHubConnection({required String baseUrl, required TransportType transportType, Map<String?, String?>? headers, String? accessTokenProviderResult, required int handleShakeResponseTimeoutInMilliseconds, required int keepAliveIntervalInMilliseconds, required int serverTimeoutInMilliseconds,}) async {
+    final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.FsignalrApi.createHubConnection$__pigeon_messageChannelSuffix';
     final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<Object?>(
       __pigeon_channelName,
       pigeonChannelCodec,
       binaryMessenger: __pigeon_binaryMessenger,
     );
     final List<Object?>? __pigeon_replyList =
-        await __pigeon_channel.send(null) as List<Object?>?;
+        await __pigeon_channel.send(<Object?>[baseUrl, transportType.index, headers, accessTokenProviderResult, handleShakeResponseTimeoutInMilliseconds, keepAliveIntervalInMilliseconds, serverTimeoutInMilliseconds]) as List<Object?>?;
     if (__pigeon_replyList == null) {
       throw _createConnectionError(__pigeon_channelName);
     } else if (__pigeon_replyList.length > 1) {
@@ -90,7 +56,7 @@ class FsignalrApi {
         details: __pigeon_replyList[2],
       );
     } else {
-      return (__pigeon_replyList[0] as PlatformVersionResult?);
+      return;
     }
   }
 }

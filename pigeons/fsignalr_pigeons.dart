@@ -11,14 +11,31 @@ import 'package:pigeon/pigeon.dart';
     ),
   ),
 )
-class PlatformVersionResult {
-  final String platformVersion;
+// Below is the classes and contracts that define the communication between
+// Dart and the native code.
 
-  PlatformVersionResult({required this.platformVersion});
+/// Used to specify the transport the client will use.
+enum TransportType {
+  /// The client will use any available transport.
+  all,
+
+  /// The client will use WebSockets to communicate with the server.
+  webSockets,
+
+  /// The client will use Long Polling to communicate with the server.
+  longPolling,
 }
 
 @HostApi()
 abstract class FsignalrApi {
   @async
-  PlatformVersionResult? getPlatformVersion();
+  void createHubConnection({
+    required String baseUrl,
+    required TransportType transportType,
+    Map<String, String>? headers,
+    String? accessTokenProviderResult,
+    required int handleShakeResponseTimeoutInMilliseconds,
+    required int keepAliveIntervalInMilliseconds,
+    required int serverTimeoutInMilliseconds,
+  });
 }
