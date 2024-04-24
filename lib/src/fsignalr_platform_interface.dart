@@ -24,15 +24,37 @@ abstract class FsignalrPlatformInterface extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<void> createHubConnection({
+  Future<void> createHubConnectionManager({
+    required int hubConnectionManagerId,
     required String baseUrl,
     required TransportType transportType,
     Map<String, String>? headers,
-    String Function()? accessTokenProvider,
+    String? accessToken,
     required int handleShakeResponseTimeoutInMilliseconds,
     required int keepAliveIntervalInMilliseconds,
     required int serverTimeoutInMilliseconds,
   }) {
-    throw UnimplementedError('createHubConnection() has not been implemented.');
+    throw UnimplementedError(
+      'createHubConnectionManager() has not been implemented.',
+    );
+  }
+
+  Future<void> removeHubConnectionManager({required int hubId}) {
+    throw UnimplementedError(
+      'removeHubConnectionManager() has not been implemented.',
+    );
+  }
+
+  Future<void> startHubConnection({required int hubConnectionManagerId}) {
+    throw UnimplementedError('startHubConnection() has not been implemented.');
+  }
+
+  Future<void> stopHubConnection({required int hubConnectionManagerId}) {
+    throw UnimplementedError('stopHubConnection() has not been implemented.');
+  }
+
+  Future<void> disposeHubConnection({required int hubConnectionManagerId}) {
+    throw UnimplementedError(
+        'disposeHubConnection() has not been implemented.');
   }
 }

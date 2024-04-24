@@ -25,11 +25,11 @@ enum TransportType {
   longPolling,
 }
 
-class FsignalrApi {
-  /// Constructor for [FsignalrApi].  The [binaryMessenger] named argument is
+class HubConnectionManagerManager {
+  /// Constructor for [HubConnectionManagerManager].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  FsignalrApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+  HubConnectionManagerManager({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
       : __pigeon_binaryMessenger = binaryMessenger,
         __pigeon_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
   final BinaryMessenger? __pigeon_binaryMessenger;
@@ -38,15 +38,118 @@ class FsignalrApi {
 
   final String __pigeon_messageChannelSuffix;
 
-  Future<void> createHubConnection({required String baseUrl, required TransportType transportType, Map<String?, String?>? headers, String? accessTokenProviderResult, required int handleShakeResponseTimeoutInMilliseconds, required int keepAliveIntervalInMilliseconds, required int serverTimeoutInMilliseconds,}) async {
-    final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.FsignalrApi.createHubConnection$__pigeon_messageChannelSuffix';
+  Future<void> createHubConnectionManager({required int id, required String baseUrl, required TransportType transportType, Map<String?, String?>? headers, String? accessToken, required int handleShakeResponseTimeoutInMilliseconds, required int keepAliveIntervalInMilliseconds, required int serverTimeoutInMilliseconds,}) async {
+    final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.HubConnectionManagerManager.createHubConnectionManager$__pigeon_messageChannelSuffix';
     final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<Object?>(
       __pigeon_channelName,
       pigeonChannelCodec,
       binaryMessenger: __pigeon_binaryMessenger,
     );
     final List<Object?>? __pigeon_replyList =
-        await __pigeon_channel.send(<Object?>[baseUrl, transportType.index, headers, accessTokenProviderResult, handleShakeResponseTimeoutInMilliseconds, keepAliveIntervalInMilliseconds, serverTimeoutInMilliseconds]) as List<Object?>?;
+        await __pigeon_channel.send(<Object?>[id, baseUrl, transportType.index, headers, accessToken, handleShakeResponseTimeoutInMilliseconds, keepAliveIntervalInMilliseconds, serverTimeoutInMilliseconds]) as List<Object?>?;
+    if (__pigeon_replyList == null) {
+      throw _createConnectionError(__pigeon_channelName);
+    } else if (__pigeon_replyList.length > 1) {
+      throw PlatformException(
+        code: __pigeon_replyList[0]! as String,
+        message: __pigeon_replyList[1] as String?,
+        details: __pigeon_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> removeHubConnectionManager({required int id}) async {
+    final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.HubConnectionManagerManager.removeHubConnectionManager$__pigeon_messageChannelSuffix';
+    final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<Object?>(
+      __pigeon_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: __pigeon_binaryMessenger,
+    );
+    final List<Object?>? __pigeon_replyList =
+        await __pigeon_channel.send(<Object?>[id]) as List<Object?>?;
+    if (__pigeon_replyList == null) {
+      throw _createConnectionError(__pigeon_channelName);
+    } else if (__pigeon_replyList.length > 1) {
+      throw PlatformException(
+        code: __pigeon_replyList[0]! as String,
+        message: __pigeon_replyList[1] as String?,
+        details: __pigeon_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+}
+
+class HubConnectionManager {
+  /// Constructor for [HubConnectionManager].  The [binaryMessenger] named argument is
+  /// available for dependency injection.  If it is left null, the default
+  /// BinaryMessenger will be used which routes to the host platform.
+  HubConnectionManager({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+      : __pigeon_binaryMessenger = binaryMessenger,
+        __pigeon_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  final BinaryMessenger? __pigeon_binaryMessenger;
+
+  static const MessageCodec<Object?> pigeonChannelCodec = StandardMessageCodec();
+
+  final String __pigeon_messageChannelSuffix;
+
+  Future<void> startHubConnection() async {
+    final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.HubConnectionManager.startHubConnection$__pigeon_messageChannelSuffix';
+    final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<Object?>(
+      __pigeon_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: __pigeon_binaryMessenger,
+    );
+    final List<Object?>? __pigeon_replyList =
+        await __pigeon_channel.send(null) as List<Object?>?;
+    if (__pigeon_replyList == null) {
+      throw _createConnectionError(__pigeon_channelName);
+    } else if (__pigeon_replyList.length > 1) {
+      throw PlatformException(
+        code: __pigeon_replyList[0]! as String,
+        message: __pigeon_replyList[1] as String?,
+        details: __pigeon_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> stopHubConnection() async {
+    final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.HubConnectionManager.stopHubConnection$__pigeon_messageChannelSuffix';
+    final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<Object?>(
+      __pigeon_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: __pigeon_binaryMessenger,
+    );
+    final List<Object?>? __pigeon_replyList =
+        await __pigeon_channel.send(null) as List<Object?>?;
+    if (__pigeon_replyList == null) {
+      throw _createConnectionError(__pigeon_channelName);
+    } else if (__pigeon_replyList.length > 1) {
+      throw PlatformException(
+        code: __pigeon_replyList[0]! as String,
+        message: __pigeon_replyList[1] as String?,
+        details: __pigeon_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  /// Used when done with using the manager.
+  Future<void> dispose() async {
+    final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.HubConnectionManager.dispose$__pigeon_messageChannelSuffix';
+    final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<Object?>(
+      __pigeon_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: __pigeon_binaryMessenger,
+    );
+    final List<Object?>? __pigeon_replyList =
+        await __pigeon_channel.send(null) as List<Object?>?;
     if (__pigeon_replyList == null) {
       throw _createConnectionError(__pigeon_channelName);
     } else if (__pigeon_replyList.length > 1) {

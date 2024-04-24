@@ -27,15 +27,36 @@ enum TransportType {
 }
 
 @HostApi()
-abstract class FsignalrApi {
+abstract class HubConnectionManagerManager {
   @async
-  void createHubConnection({
+  void createHubConnectionManager({
+    /// The unique id of the hub connection manager to be created.
+    required int id,
     required String baseUrl,
     required TransportType transportType,
     Map<String, String>? headers,
-    String? accessTokenProviderResult,
+    String? accessToken,
     required int handleShakeResponseTimeoutInMilliseconds,
     required int keepAliveIntervalInMilliseconds,
     required int serverTimeoutInMilliseconds,
   });
+
+  @async
+  void removeHubConnectionManager({
+    /// The unique id of the hub connection manager to be removed.
+    required int id,
+  });
+}
+
+@HostApi()
+abstract class HubConnectionManager {
+  @async
+  void startHubConnection();
+
+  @async
+  void stopHubConnection();
+
+  /// Used when done with using the manager.
+  @async
+  void dispose();
 }

@@ -31,18 +31,34 @@ class _MainAppState extends State<MainApp> {
   }
 
   Future<void> _startProcess() async {
-    setState(() {
-      _processFuture = Future.delayed(const Duration(seconds: 1));
+    _processFuture = Future.delayed(const Duration(seconds: 1));
 
-      Fsignalr().createHubConnection(
-        baseUrl: 'http://192.168.1.7:5094/chatHub',
-        transportType: TransportType.all,
-        headers: {'token': '123'},
-        accessTokenProvider: () => '123',
-        handleShakeResponseTimeoutInMilliseconds: 100,
-        keepAliveIntervalInMilliSeconds: 200,
-        serverTimeoutInMilliSeconds: 300,
-      );
+    HubConnectionManager h1 = HubConnectionManager();
+    await h1.createHubConnection(
+      baseUrl: 'http://192.168.1.7:5094/chatHub',
+      transportType: TransportType.all,
+      headers: {'token': '123'},
+      accessToken: '123',
+      handleShakeResponseTimeoutInMilliseconds: 10000,
+      keepAliveIntervalInMilliSeconds: 20000,
+      serverTimeoutInMilliSeconds: 30000,
+    );
+    await h1.startConnection();
+
+    HubConnectionManager h2 = HubConnectionManager();
+    await h2.createHubConnection(
+      baseUrl: 'http://192.168.1.7:5094/chatHub',
+      transportType: TransportType.all,
+      headers: {'token': '123'},
+      accessToken: '123',
+      handleShakeResponseTimeoutInMilliseconds: 10000,
+      keepAliveIntervalInMilliSeconds: 20000,
+      serverTimeoutInMilliSeconds: 30000,
+    );
+    await h2.startConnection();
+
+    setState(() {
+      _connectionState = 'Connected';
     });
   }
 

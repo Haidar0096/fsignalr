@@ -98,36 +98,39 @@ public class FsignalrPigeons {
     void error(@NonNull Throwable error);
   }
   /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
-  public interface FsignalrApi {
+  public interface HubConnectionManagerManager {
 
-    void createHubConnection(@NonNull String baseUrl, @NonNull TransportType transportType, @Nullable Map<String, String> headers, @Nullable String accessTokenProviderResult, @NonNull Long handleShakeResponseTimeoutInMilliseconds, @NonNull Long keepAliveIntervalInMilliseconds, @NonNull Long serverTimeoutInMilliseconds, @NonNull VoidResult result);
+    void createHubConnectionManager(@NonNull Long id, @NonNull String baseUrl, @NonNull TransportType transportType, @Nullable Map<String, String> headers, @Nullable String accessToken, @NonNull Long handleShakeResponseTimeoutInMilliseconds, @NonNull Long keepAliveIntervalInMilliseconds, @NonNull Long serverTimeoutInMilliseconds, @NonNull VoidResult result);
 
-    /** The codec used by FsignalrApi. */
+    void removeHubConnectionManager(@NonNull Long id, @NonNull VoidResult result);
+
+    /** The codec used by HubConnectionManagerManager. */
     static @NonNull MessageCodec<Object> getCodec() {
       return new StandardMessageCodec();
     }
-    /**Sets up an instance of `FsignalrApi` to handle messages through the `binaryMessenger`. */
-    static void setUp(@NonNull BinaryMessenger binaryMessenger, @Nullable FsignalrApi api) {
+    /**Sets up an instance of `HubConnectionManagerManager` to handle messages through the `binaryMessenger`. */
+    static void setUp(@NonNull BinaryMessenger binaryMessenger, @Nullable HubConnectionManagerManager api) {
       setUp(binaryMessenger, "", api);
     }
-    static void setUp(@NonNull BinaryMessenger binaryMessenger, @NonNull String messageChannelSuffix, @Nullable FsignalrApi api) {
+    static void setUp(@NonNull BinaryMessenger binaryMessenger, @NonNull String messageChannelSuffix, @Nullable HubConnectionManagerManager api) {
       messageChannelSuffix = messageChannelSuffix.isEmpty() ? "" : "." + messageChannelSuffix;
       {
         BasicMessageChannel<Object> channel =
             new BasicMessageChannel<>(
-                binaryMessenger, "dev.flutter.pigeon.fsignalr.FsignalrApi.createHubConnection" + messageChannelSuffix, getCodec());
+                binaryMessenger, "dev.flutter.pigeon.fsignalr.HubConnectionManagerManager.createHubConnectionManager" + messageChannelSuffix, getCodec());
         if (api != null) {
           channel.setMessageHandler(
               (message, reply) -> {
                 ArrayList<Object> wrapped = new ArrayList<Object>();
                 ArrayList<Object> args = (ArrayList<Object>) message;
-                String baseUrlArg = (String) args.get(0);
-                TransportType transportTypeArg = TransportType.values()[(int) args.get(1)];
-                Map<String, String> headersArg = (Map<String, String>) args.get(2);
-                String accessTokenProviderResultArg = (String) args.get(3);
-                Number handleShakeResponseTimeoutInMillisecondsArg = (Number) args.get(4);
-                Number keepAliveIntervalInMillisecondsArg = (Number) args.get(5);
-                Number serverTimeoutInMillisecondsArg = (Number) args.get(6);
+                Number idArg = (Number) args.get(0);
+                String baseUrlArg = (String) args.get(1);
+                TransportType transportTypeArg = TransportType.values()[(int) args.get(2)];
+                Map<String, String> headersArg = (Map<String, String>) args.get(3);
+                String accessTokenArg = (String) args.get(4);
+                Number handleShakeResponseTimeoutInMillisecondsArg = (Number) args.get(5);
+                Number keepAliveIntervalInMillisecondsArg = (Number) args.get(6);
+                Number serverTimeoutInMillisecondsArg = (Number) args.get(7);
                 VoidResult resultCallback =
                     new VoidResult() {
                       public void success() {
@@ -141,7 +144,138 @@ public class FsignalrPigeons {
                       }
                     };
 
-                api.createHubConnection(baseUrlArg, transportTypeArg, headersArg, accessTokenProviderResultArg, (handleShakeResponseTimeoutInMillisecondsArg == null) ? null : handleShakeResponseTimeoutInMillisecondsArg.longValue(), (keepAliveIntervalInMillisecondsArg == null) ? null : keepAliveIntervalInMillisecondsArg.longValue(), (serverTimeoutInMillisecondsArg == null) ? null : serverTimeoutInMillisecondsArg.longValue(), resultCallback);
+                api.createHubConnectionManager((idArg == null) ? null : idArg.longValue(), baseUrlArg, transportTypeArg, headersArg, accessTokenArg, (handleShakeResponseTimeoutInMillisecondsArg == null) ? null : handleShakeResponseTimeoutInMillisecondsArg.longValue(), (keepAliveIntervalInMillisecondsArg == null) ? null : keepAliveIntervalInMillisecondsArg.longValue(), (serverTimeoutInMillisecondsArg == null) ? null : serverTimeoutInMillisecondsArg.longValue(), resultCallback);
+              });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(
+                binaryMessenger, "dev.flutter.pigeon.fsignalr.HubConnectionManagerManager.removeHubConnectionManager" + messageChannelSuffix, getCodec());
+        if (api != null) {
+          channel.setMessageHandler(
+              (message, reply) -> {
+                ArrayList<Object> wrapped = new ArrayList<Object>();
+                ArrayList<Object> args = (ArrayList<Object>) message;
+                Number idArg = (Number) args.get(0);
+                VoidResult resultCallback =
+                    new VoidResult() {
+                      public void success() {
+                        wrapped.add(0, null);
+                        reply.reply(wrapped);
+                      }
+
+                      public void error(Throwable error) {
+                        ArrayList<Object> wrappedError = wrapError(error);
+                        reply.reply(wrappedError);
+                      }
+                    };
+
+                api.removeHubConnectionManager((idArg == null) ? null : idArg.longValue(), resultCallback);
+              });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+    }
+  }
+  /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
+  public interface HubConnectionManager {
+
+    void startHubConnection(@NonNull VoidResult result);
+
+    void stopHubConnection(@NonNull VoidResult result);
+    /** Used when done with using the manager. */
+    void dispose(@NonNull VoidResult result);
+
+    /** The codec used by HubConnectionManager. */
+    static @NonNull MessageCodec<Object> getCodec() {
+      return new StandardMessageCodec();
+    }
+    /**Sets up an instance of `HubConnectionManager` to handle messages through the `binaryMessenger`. */
+    static void setUp(@NonNull BinaryMessenger binaryMessenger, @Nullable HubConnectionManager api) {
+      setUp(binaryMessenger, "", api);
+    }
+    static void setUp(@NonNull BinaryMessenger binaryMessenger, @NonNull String messageChannelSuffix, @Nullable HubConnectionManager api) {
+      messageChannelSuffix = messageChannelSuffix.isEmpty() ? "" : "." + messageChannelSuffix;
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(
+                binaryMessenger, "dev.flutter.pigeon.fsignalr.HubConnectionManager.startHubConnection" + messageChannelSuffix, getCodec());
+        if (api != null) {
+          channel.setMessageHandler(
+              (message, reply) -> {
+                ArrayList<Object> wrapped = new ArrayList<Object>();
+                VoidResult resultCallback =
+                    new VoidResult() {
+                      public void success() {
+                        wrapped.add(0, null);
+                        reply.reply(wrapped);
+                      }
+
+                      public void error(Throwable error) {
+                        ArrayList<Object> wrappedError = wrapError(error);
+                        reply.reply(wrappedError);
+                      }
+                    };
+
+                api.startHubConnection(resultCallback);
+              });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(
+                binaryMessenger, "dev.flutter.pigeon.fsignalr.HubConnectionManager.stopHubConnection" + messageChannelSuffix, getCodec());
+        if (api != null) {
+          channel.setMessageHandler(
+              (message, reply) -> {
+                ArrayList<Object> wrapped = new ArrayList<Object>();
+                VoidResult resultCallback =
+                    new VoidResult() {
+                      public void success() {
+                        wrapped.add(0, null);
+                        reply.reply(wrapped);
+                      }
+
+                      public void error(Throwable error) {
+                        ArrayList<Object> wrappedError = wrapError(error);
+                        reply.reply(wrappedError);
+                      }
+                    };
+
+                api.stopHubConnection(resultCallback);
+              });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(
+                binaryMessenger, "dev.flutter.pigeon.fsignalr.HubConnectionManager.dispose" + messageChannelSuffix, getCodec());
+        if (api != null) {
+          channel.setMessageHandler(
+              (message, reply) -> {
+                ArrayList<Object> wrapped = new ArrayList<Object>();
+                VoidResult resultCallback =
+                    new VoidResult() {
+                      public void success() {
+                        wrapped.add(0, null);
+                        reply.reply(wrapped);
+                      }
+
+                      public void error(Throwable error) {
+                        ArrayList<Object> wrappedError = wrapError(error);
+                        reply.reply(wrappedError);
+                      }
+                    };
+
+                api.dispose(resultCallback);
               });
         } else {
           channel.setMessageHandler(null);
