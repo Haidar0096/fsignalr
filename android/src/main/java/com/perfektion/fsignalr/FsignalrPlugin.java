@@ -1,6 +1,6 @@
 package com.perfektion.fsignalr;
 
-import static com.perfektion.fsignalr.FsignalrPluginUtils.getHubConnectionDoesNotExistMessage;
+import static com.perfektion.fsignalr.FsignalrPluginUtils.getHubConnectionManagerDoesNotExistMessage;
 
 import androidx.annotation.NonNull;
 
@@ -72,7 +72,7 @@ public class FsignalrPlugin implements FlutterPlugin, Messages.HubConnectionMana
         final Long id = msg.getHubConnectionManagerId();
         HubConnectionManager hubConnectionManager = hubConnectionManagers.get(id);
         if (hubConnectionManager == null) {
-            result.error(new Throwable(getHubConnectionDoesNotExistMessage(id)));
+            result.error(new Throwable(getHubConnectionManagerDoesNotExistMessage(id)));
             return;
         }
 
@@ -84,7 +84,7 @@ public class FsignalrPlugin implements FlutterPlugin, Messages.HubConnectionMana
         final Long id = msg.getHubConnectionManagerId();
         HubConnectionManager hubConnectionManager = hubConnectionManagers.get(id);
         if (hubConnectionManager == null) {
-            result.error(new Throwable(getHubConnectionDoesNotExistMessage(id)));
+            result.error(new Throwable(getHubConnectionManagerDoesNotExistMessage(id)));
             return;
         }
 
@@ -92,11 +92,23 @@ public class FsignalrPlugin implements FlutterPlugin, Messages.HubConnectionMana
     }
 
     @Override
+    public void invoke(@NonNull Messages.InvokeMessage msg, @NonNull Messages.VoidResult result) {
+        final Long id = msg.getHubConnectionManagerIdMessage().getHubConnectionManagerId();
+        HubConnectionManager hubConnectionManager = hubConnectionManagers.get(id);
+        if (hubConnectionManager == null) {
+            result.error(new Throwable(getHubConnectionManagerDoesNotExistMessage(id)));
+            return;
+        }
+
+        hubConnectionManager.invoke(msg.getMethodName(), msg.getArgs(), result);
+    }
+
+    @Override
     public void disposeHubConnectionManager(@NonNull Messages.HubConnectionManagerIdMessage msg, @NonNull Messages.VoidResult result) {
         final Long id = msg.getHubConnectionManagerId();
         HubConnectionManager hubConnectionManager = hubConnectionManagers.get(id);
         if (hubConnectionManager == null) {
-            result.error(new Throwable(getHubConnectionDoesNotExistMessage(id)));
+            result.error(new Throwable(getHubConnectionManagerDoesNotExistMessage(id)));
             return;
         }
 

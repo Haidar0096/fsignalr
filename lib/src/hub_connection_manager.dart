@@ -14,6 +14,7 @@ class HubConnectionManager {
 
   const HubConnectionManager._(this._hubConnectionManagerId);
 
+  /// Creates a new instance of [HubConnectionManager] with the given parameters.
   static Future<HubConnectionManager> createHubConnection({
     required String baseUrl,
     required TransportType transportType,
@@ -37,12 +38,32 @@ class HubConnectionManager {
     return HubConnectionManager._(hubConnectionManagerId);
   }
 
+  /// Starts the hub connection.
   Future<void> startConnection() => FsignalrPlatformInterface.instance
       .startHubConnection(hubConnectionManagerId: _hubConnectionManagerId);
 
+  /// Stops the hub connection.
   Future<void> stopConnection() => FsignalrPlatformInterface.instance
       .stopHubConnection(hubConnectionManagerId: _hubConnectionManagerId);
 
+  /// Invokes a method on the server with the given parameters.
+  /// - [methodName] : The name of the method to invoke on the server.
+  /// - [args] : Optional list of arguments to pass to the server method.
+  /// Currently only supports string arguments.
+  /// For passing complex objects, consider serializing them to JSON strings,
+  /// then deserializing them on the server.
+  Future<void> invoke({
+    required String methodName,
+    List<String?>? args,
+  }) =>
+      FsignalrPlatformInterface.instance.invoke(
+        methodName: methodName,
+        args: args,
+        hubConnectionManagerId: _hubConnectionManagerId,
+      );
+
+  /// Disposes the hub connection manager. After calling this method, the
+  /// instance of this class should not be used anymore.
   Future<void> dispose() =>
       FsignalrPlatformInterface.instance.disposeHubConnectionManager(
         hubConnectionManagerId: _hubConnectionManagerId,

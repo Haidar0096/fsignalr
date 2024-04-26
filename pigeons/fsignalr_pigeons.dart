@@ -52,6 +52,20 @@ class HubConnectionManagerIdMessage {
   });
 }
 
+class InvokeMessage {
+  String methodName;
+
+  List<String?>? args;
+
+  HubConnectionManagerIdMessage hubConnectionManagerIdMessage;
+
+  InvokeMessage({
+    required this.methodName,
+    required this.args,
+    required this.hubConnectionManagerIdMessage,
+  });
+}
+
 /// Used to manage hub connections managers on the native side.
 @HostApi()
 abstract class HubConnectionManagerApi {
@@ -69,5 +83,10 @@ abstract class HubConnectionManagerApi {
   void stopHubConnection(HubConnectionManagerIdMessage msg);
 
   @async
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  void invoke(InvokeMessage msg);
+
+  @async
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   void disposeHubConnectionManager(HubConnectionManagerIdMessage msg);
 }

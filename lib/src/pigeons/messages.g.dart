@@ -93,6 +93,37 @@ class HubConnectionManagerIdMessage {
   }
 }
 
+class InvokeMessage {
+  InvokeMessage({
+    required this.methodName,
+    this.args,
+    required this.hubConnectionManagerIdMessage,
+  });
+
+  String methodName;
+
+  List<String?>? args;
+
+  HubConnectionManagerIdMessage hubConnectionManagerIdMessage;
+
+  Object encode() {
+    return <Object?>[
+      methodName,
+      args,
+      hubConnectionManagerIdMessage.encode(),
+    ];
+  }
+
+  static InvokeMessage decode(Object result) {
+    result as List<Object?>;
+    return InvokeMessage(
+      methodName: result[0]! as String,
+      args: (result[1] as List<Object?>?)?.cast<String?>(),
+      hubConnectionManagerIdMessage: HubConnectionManagerIdMessage.decode(result[2]! as List<Object?>),
+    );
+  }
+}
+
 class _HubConnectionManagerApiCodec extends StandardMessageCodec {
   const _HubConnectionManagerApiCodec();
   @override
@@ -102,6 +133,9 @@ class _HubConnectionManagerApiCodec extends StandardMessageCodec {
       writeValue(buffer, value.encode());
     } else if (value is HubConnectionManagerIdMessage) {
       buffer.putUint8(129);
+      writeValue(buffer, value.encode());
+    } else if (value is InvokeMessage) {
+      buffer.putUint8(130);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -115,6 +149,8 @@ class _HubConnectionManagerApiCodec extends StandardMessageCodec {
         return CreateHubConnectionManagerMessage.decode(readValue(buffer)!);
       case 129: 
         return HubConnectionManagerIdMessage.decode(readValue(buffer)!);
+      case 130: 
+        return InvokeMessage.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -186,6 +222,28 @@ class HubConnectionManagerApi {
 
   Future<void> stopHubConnection(HubConnectionManagerIdMessage msg) async {
     final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.HubConnectionManagerApi.stopHubConnection$__pigeon_messageChannelSuffix';
+    final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<Object?>(
+      __pigeon_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: __pigeon_binaryMessenger,
+    );
+    final List<Object?>? __pigeon_replyList =
+        await __pigeon_channel.send(<Object?>[msg]) as List<Object?>?;
+    if (__pigeon_replyList == null) {
+      throw _createConnectionError(__pigeon_channelName);
+    } else if (__pigeon_replyList.length > 1) {
+      throw PlatformException(
+        code: __pigeon_replyList[0]! as String,
+        message: __pigeon_replyList[1] as String?,
+        details: __pigeon_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> invoke(InvokeMessage msg) async {
+    final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.HubConnectionManagerApi.invoke$__pigeon_messageChannelSuffix';
     final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<Object?>(
       __pigeon_channelName,
       pigeonChannelCodec,

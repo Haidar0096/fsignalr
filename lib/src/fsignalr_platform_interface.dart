@@ -45,6 +45,14 @@ abstract class FsignalrPlatformInterface extends PlatformInterface {
     throw UnimplementedError('stopHubConnection() has not been implemented.');
   }
 
+  Future<void> invoke({
+    required String methodName,
+    List<String?>? args,
+    required int hubConnectionManagerId,
+  }) {
+    throw UnimplementedError('invoke() has not been implemented.');
+  }
+
   Future<void> disposeHubConnectionManager({
     required int hubConnectionManagerId,
   }) {

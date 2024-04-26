@@ -322,6 +322,103 @@ public class Messages {
     }
   }
 
+  /** Generated class from Pigeon that represents data sent in messages. */
+  public static final class InvokeMessage {
+    private @NonNull String methodName;
+
+    public @NonNull String getMethodName() {
+      return methodName;
+    }
+
+    public void setMethodName(@NonNull String setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"methodName\" is null.");
+      }
+      this.methodName = setterArg;
+    }
+
+    private @Nullable List<String> args;
+
+    public @Nullable List<String> getArgs() {
+      return args;
+    }
+
+    public void setArgs(@Nullable List<String> setterArg) {
+      this.args = setterArg;
+    }
+
+    private @NonNull HubConnectionManagerIdMessage hubConnectionManagerIdMessage;
+
+    public @NonNull HubConnectionManagerIdMessage getHubConnectionManagerIdMessage() {
+      return hubConnectionManagerIdMessage;
+    }
+
+    public void setHubConnectionManagerIdMessage(@NonNull HubConnectionManagerIdMessage setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"hubConnectionManagerIdMessage\" is null.");
+      }
+      this.hubConnectionManagerIdMessage = setterArg;
+    }
+
+    /** Constructor is non-public to enforce null safety; use Builder. */
+    InvokeMessage() {}
+
+    public static final class Builder {
+
+      private @Nullable String methodName;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setMethodName(@NonNull String setterArg) {
+        this.methodName = setterArg;
+        return this;
+      }
+
+      private @Nullable List<String> args;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setArgs(@Nullable List<String> setterArg) {
+        this.args = setterArg;
+        return this;
+      }
+
+      private @Nullable HubConnectionManagerIdMessage hubConnectionManagerIdMessage;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setHubConnectionManagerIdMessage(@NonNull HubConnectionManagerIdMessage setterArg) {
+        this.hubConnectionManagerIdMessage = setterArg;
+        return this;
+      }
+
+      public @NonNull InvokeMessage build() {
+        InvokeMessage pigeonReturn = new InvokeMessage();
+        pigeonReturn.setMethodName(methodName);
+        pigeonReturn.setArgs(args);
+        pigeonReturn.setHubConnectionManagerIdMessage(hubConnectionManagerIdMessage);
+        return pigeonReturn;
+      }
+    }
+
+    @NonNull
+    ArrayList<Object> toList() {
+      ArrayList<Object> toListResult = new ArrayList<Object>(3);
+      toListResult.add(methodName);
+      toListResult.add(args);
+      toListResult.add((hubConnectionManagerIdMessage == null) ? null : hubConnectionManagerIdMessage.toList());
+      return toListResult;
+    }
+
+    static @NonNull InvokeMessage fromList(@NonNull ArrayList<Object> list) {
+      InvokeMessage pigeonResult = new InvokeMessage();
+      Object methodName = list.get(0);
+      pigeonResult.setMethodName((String) methodName);
+      Object args = list.get(1);
+      pigeonResult.setArgs((List<String>) args);
+      Object hubConnectionManagerIdMessage = list.get(2);
+      pigeonResult.setHubConnectionManagerIdMessage((hubConnectionManagerIdMessage == null) ? null : HubConnectionManagerIdMessage.fromList((ArrayList<Object>) hubConnectionManagerIdMessage));
+      return pigeonResult;
+    }
+  }
+
   /** Asynchronous error handling return type for non-nullable API method returns. */
   public interface Result<T> {
     /** Success case callback method for handling returns. */
@@ -359,6 +456,8 @@ public class Messages {
           return CreateHubConnectionManagerMessage.fromList((ArrayList<Object>) readValue(buffer));
         case (byte) 129:
           return HubConnectionManagerIdMessage.fromList((ArrayList<Object>) readValue(buffer));
+        case (byte) 130:
+          return InvokeMessage.fromList((ArrayList<Object>) readValue(buffer));
         default:
           return super.readValueOfType(type, buffer);
       }
@@ -372,6 +471,9 @@ public class Messages {
       } else if (value instanceof HubConnectionManagerIdMessage) {
         stream.write(129);
         writeValue(stream, ((HubConnectionManagerIdMessage) value).toList());
+      } else if (value instanceof InvokeMessage) {
+        stream.write(130);
+        writeValue(stream, ((InvokeMessage) value).toList());
       } else {
         super.writeValue(stream, value);
       }
@@ -390,6 +492,8 @@ public class Messages {
     void startHubConnection(@NonNull HubConnectionManagerIdMessage msg, @NonNull VoidResult result);
 
     void stopHubConnection(@NonNull HubConnectionManagerIdMessage msg, @NonNull VoidResult result);
+
+    void invoke(@NonNull InvokeMessage msg, @NonNull VoidResult result);
 
     void disposeHubConnectionManager(@NonNull HubConnectionManagerIdMessage msg, @NonNull VoidResult result);
 
@@ -493,9 +597,40 @@ public class Messages {
         }
       }
       {
+        BinaryMessenger.TaskQueue taskQueue = binaryMessenger.makeBackgroundTaskQueue();
         BasicMessageChannel<Object> channel =
             new BasicMessageChannel<>(
-                binaryMessenger, "dev.flutter.pigeon.fsignalr.HubConnectionManagerApi.disposeHubConnectionManager" + messageChannelSuffix, getCodec());
+                binaryMessenger, "dev.flutter.pigeon.fsignalr.HubConnectionManagerApi.invoke" + messageChannelSuffix, getCodec(), taskQueue);
+        if (api != null) {
+          channel.setMessageHandler(
+              (message, reply) -> {
+                ArrayList<Object> wrapped = new ArrayList<Object>();
+                ArrayList<Object> args = (ArrayList<Object>) message;
+                InvokeMessage msgArg = (InvokeMessage) args.get(0);
+                VoidResult resultCallback =
+                    new VoidResult() {
+                      public void success() {
+                        wrapped.add(0, null);
+                        reply.reply(wrapped);
+                      }
+
+                      public void error(Throwable error) {
+                        ArrayList<Object> wrappedError = wrapError(error);
+                        reply.reply(wrappedError);
+                      }
+                    };
+
+                api.invoke(msgArg, resultCallback);
+              });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BinaryMessenger.TaskQueue taskQueue = binaryMessenger.makeBackgroundTaskQueue();
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(
+                binaryMessenger, "dev.flutter.pigeon.fsignalr.HubConnectionManagerApi.disposeHubConnectionManager" + messageChannelSuffix, getCodec(), taskQueue);
         if (api != null) {
           channel.setMessageHandler(
               (message, reply) -> {

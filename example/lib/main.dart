@@ -189,7 +189,63 @@ class _MainAppState extends State<MainApp> {
         ),
       );
 
-  Future<void> _onM1SendMessagePressed(messageText) async {}
+  Future<void> _onM1SendMessagePressed(String messageText) async {
+    if (_isProcessing) await _processingCompleter?.future;
 
-  Future<void> _onM2SendMessagePressed(messageText) async {}
+    _processingCompleter = Completer();
+
+    _performSendMessage(
+      hubConnectionManager: _m1,
+      methodName: 'SendMessage',
+      args: ['First Hub', messageText],
+      uiMessagesList: _m1Messages,
+    );
+
+    setState(() {});
+
+    return _processingCompleter?.future;
+  }
+
+  Future<void> _onM2SendMessagePressed(String messageText) async {
+    if (_isProcessing) await _processingCompleter?.future;
+
+    _processingCompleter = Completer();
+
+    _performSendMessage(
+      hubConnectionManager: _m2,
+      methodName: 'SendMessage',
+      args: ['Second Hub', messageText],
+      uiMessagesList: _m2Messages,
+    );
+
+    setState(() {});
+
+    return _processingCompleter?.future;
+  }
+
+  Future<void> _performSendMessage({
+    required HubConnectionManager hubConnectionManager,
+    required String methodName,
+    required List<String?>? args,
+    required List<Message> uiMessagesList,
+  }) async {
+    try {
+      await hubConnectionManager.invoke(
+        methodName: methodName,
+        args: args,
+      );
+
+      _processingCompleter?.complete();
+
+      uiMessagesList.add(
+        Message(
+          user: args?.elementAtOrNull(0),
+          text: args?.elementAtOrNull(1),
+        ),
+      );
+      setState(() {});
+    } catch (e) {
+      _processingCompleter?.completeError(e);
+    }
+  }
 }

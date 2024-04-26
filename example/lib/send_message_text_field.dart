@@ -49,7 +49,6 @@ class _SendMessageTextFieldState extends State<SendMessageTextField> {
             icon: const Icon(Icons.send),
             onPressed: () {
               widget.onSendMessagePressed(_messageController.text);
-              _messageController.clear();
             },
           ),
         ],
