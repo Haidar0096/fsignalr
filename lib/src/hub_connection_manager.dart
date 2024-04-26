@@ -1,8 +1,8 @@
 import 'fsignalr_platform_interface.dart';
-import 'pigeons/fsignalr_pigeons.g.dart';
 
-/// Internally represents an id for a [HubConnectionManager] instance.
-int _hubConnectionManagerCreationId = 0;
+const Duration _defaultHandShakeResponseTimeout = Duration(seconds: 10);
+const Duration _defaultKeepAliveInterval = Duration(seconds: 15);
+const Duration _defaultServerTimeout = Duration(seconds: 30);
 
 /// A class that provides an API to manage signalr connections. Each instance
 /// of this class manages a single hub connection.
@@ -10,28 +10,32 @@ int _hubConnectionManagerCreationId = 0;
 /// TODO: Add usage section.
 class HubConnectionManager {
   /// Represents a unique id for the hub connection managed by this instance.
-  final int _hubConnectionManagerId = _hubConnectionManagerCreationId++;
+  final int _hubConnectionManagerId;
 
-  Future<void> createHubConnection({
+  const HubConnectionManager._(this._hubConnectionManagerId);
+
+  static Future<HubConnectionManager> createHubConnection({
     required String baseUrl,
     required TransportType transportType,
     Map<String, String>? headers,
     String? accessToken,
-    int handleShakeResponseTimeoutInMilliseconds = 10000,
-    int keepAliveIntervalInMilliSeconds = 15000,
-    int serverTimeoutInMilliSeconds = 30000,
-  }) =>
-      FsignalrPlatformInterface.instance.createHubConnectionManager(
-        hubConnectionManagerId: _hubConnectionManagerId,
-        baseUrl: baseUrl,
-        transportType: transportType,
-        headers: headers,
-        accessToken: accessToken,
-        handleShakeResponseTimeoutInMilliseconds:
-            handleShakeResponseTimeoutInMilliseconds,
-        keepAliveIntervalInMilliseconds: keepAliveIntervalInMilliSeconds,
-        serverTimeoutInMilliseconds: serverTimeoutInMilliSeconds,
-      );
+    Duration? handShakeResponseTimeout,
+    Duration? keepAliveInterval,
+    Duration? serverTimeout,
+  }) async {
+    final int hubConnectionManagerId =
+        await FsignalrPlatformInterface.instance.createHubConnectionManager(
+      baseUrl: baseUrl,
+      transportType: transportType,
+      headers: headers,
+      accessToken: accessToken,
+      handShakeResponseTimeout:
+          handShakeResponseTimeout ?? _defaultHandShakeResponseTimeout,
+      keepAliveInterval: keepAliveInterval ?? _defaultKeepAliveInterval,
+      serverTimeout: serverTimeout ?? _defaultServerTimeout,
+    );
+    return HubConnectionManager._(hubConnectionManagerId);
+  }
 
   Future<void> startConnection() => FsignalrPlatformInterface.instance
       .startHubConnection(hubConnectionManagerId: _hubConnectionManagerId);
@@ -39,6 +43,8 @@ class HubConnectionManager {
   Future<void> stopConnection() => FsignalrPlatformInterface.instance
       .stopHubConnection(hubConnectionManagerId: _hubConnectionManagerId);
 
-  Future<void> dispose() => FsignalrPlatformInterface.instance
-      .disposeHubConnection(hubConnectionManagerId: _hubConnectionManagerId);
+  Future<void> dispose() =>
+      FsignalrPlatformInterface.instance.disposeHubConnectionManager(
+        hubConnectionManagerId: _hubConnectionManagerId,
+      );
 }

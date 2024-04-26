@@ -1,109 +1,76 @@
 import 'package:flutter/material.dart';
 
 import 'message.dart';
+import 'messages_list_view.dart';
+import 'send_message_text_field.dart';
 
-class ChatView extends StatefulWidget {
-  final List<Message> messages;
-  final Future<void> Function(String messageText) onSendMessagePressed;
+class ChatView extends StatelessWidget {
+  final List<Message> m1Messages;
+  final List<Message> m2Messages;
+  final Future<void> Function(String messageText) onM1SendMessagePressed;
+  final Future<void> Function(String messageText) onM2SendMessagePressed;
   final bool loading;
   final String connectionState;
 
   const ChatView({
     super.key,
-    required this.messages,
-    required this.onSendMessagePressed,
+    required this.m1Messages,
+    required this.m2Messages,
+    required this.onM1SendMessagePressed,
+    required this.onM2SendMessagePressed,
     required this.loading,
     required this.connectionState,
   });
 
   @override
-  State<ChatView> createState() => _ChatViewState();
-}
-
-class _ChatViewState extends State<ChatView> {
-  final TextEditingController _messageController = TextEditingController();
-
-  @override
-  void dispose() {
-    _messageController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => Stack(
-        children: [
-          Align(
-            alignment: Alignment.topRight,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                widget.connectionState,
+  Widget build(BuildContext context) => Scaffold(
+        body: Stack(
+          children: [
+            Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(connectionState),
               ),
             ),
-          ),
-          Column(
-            children: [
-              Expanded(
-                child: ListView.builder(
-                  itemCount: widget.messages.length,
-                  itemBuilder: (context, index) => ListTile(
-                    title: Text(
-                      _getMessageDisplayText(widget.messages[index].text),
-                    ),
-                    subtitle: Text(
-                      widget.messages[index].user ?? '[Unknown user]',
-                      style: const TextStyle(
-                        fontStyle: FontStyle.italic,
-                        fontWeight: FontWeight.bold,
+            Column(
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: MessagesListView(
+                          messages: m1Messages,
+                          backgroundColor: Colors.grey.shade400,
+                        ),
                       ),
-                    ),
+                      Expanded(
+                        child: MessagesListView(
+                          messages: m2Messages,
+                          backgroundColor: Colors.grey.shade300,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextField(
-                        controller: _messageController,
-                        decoration: const InputDecoration(
-                          hintText: 'Enter a message',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.zero,
-                            borderSide: BorderSide(
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                        onTapOutside: (_) =>
-                            FocusManager.instance.primaryFocus?.unfocus(),
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.send),
-                    onPressed: () {
-                      widget.onSendMessagePressed(_messageController.text);
-                      _messageController.clear();
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-          if (widget.loading)
-            const Align(
-              alignment: Alignment.center,
-              child: CircularProgressIndicator(),
+                SendMessageTextField(
+                  hintText: 'Enter a message for first hub',
+                  onSendMessagePressed: onM1SendMessagePressed,
+                ),
+                SendMessageTextField(
+                  hintText: 'Enter a message for second hub',
+                  onSendMessagePressed: onM2SendMessagePressed,
+                ),
+              ],
             ),
-        ],
+            if (loading)
+              Positioned.fill(
+                child: Container(
+                  color: Colors.black.withOpacity(0.5),
+                  child: const Center(child: CircularProgressIndicator()),
+                ),
+              ),
+          ],
+        ),
       );
-
-  String _getMessageDisplayText(String? messageText) {
-    if (messageText == null || messageText.isEmpty) {
-      return '[Empty message]';
-    }
-    return messageText;
-  }
 }

@@ -1,4 +1,4 @@
 library fsignalr;
 
 export 'src/hub_connection_manager.dart';
-export 'src/pigeons/fsignalr_pigeons.g.dart' show TransportType;
+export 'src/fsignalr_platform_interface.dart' show TransportType;

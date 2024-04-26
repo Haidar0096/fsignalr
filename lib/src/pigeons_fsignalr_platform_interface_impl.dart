@@ -1,89 +1,68 @@
 import 'fsignalr_platform_interface.dart';
-import 'pigeons/fsignalr_pigeons.g.dart';
+import 'pigeons/messages.g.dart';
 
 /// An implementation of [FsignalrPlatformInterface] that uses pigeons package.
 class PigeonsFsignalrPlatform extends FsignalrPlatformInterface {
-  final HubConnectionManagerManager _hubConnectionManagerManager =
-      HubConnectionManagerManager();
-
-  final Map<int, HubConnectionManager> _hubConnectionManagers = {};
-
-  //  Future<void> createHubConnectionManager({
-  //     required int hubConnectionManagerId,
-  //     required String baseUrl,
-  //     required TransportType transportType,
-  //     Map<String, String>? headers,
-  //     String Function()? accessTokenProvider,
-  //     required int handleShakeResponseTimeoutInMilliseconds,
-  //     required int keepAliveIntervalInMilliseconds,
-  //     required int serverTimeoutInMilliseconds,
-  //   }) {
-  //     throw UnimplementedError(
-  //       'createHubConnectionManager() has not been implemented.',
-  //     );
-  //   }
-  //
-  //   Future<void> removeHubConnectionManager({required int hubId}) {
-  //     throw UnimplementedError(
-  //       'removeHubConnectionManager() has not been implemented.',
-  //     );
-  //   }
-  //
-  //   Future<void> startHubConnection({required int hubConnectionManagerId}) {
-  //     throw UnimplementedError('startHubConnection() has not been implemented.');
-  //   }
-  //
-  //   Future<void> stopHubConnection({required int hubConnectionManagerId}) {
-  //     throw UnimplementedError('stopHubConnection() has not been implemented.');
-  //   }
-  //
-  //   Future<void> disposeHubConnection({required int hubConnectionManagerId}) {
-  //     throw UnimplementedError(
-  //         'disposeHubConnection() has not been implemented.');
-  //   }
+  /// Used to communicate with the native side of the plugin.
+  final HubConnectionManagerApi _hubConnectionManagerApi =
+      HubConnectionManagerApi();
 
   @override
-  Future<void> createHubConnectionManager({
-    required int hubConnectionManagerId,
+  Future<int> createHubConnectionManager({
     required String baseUrl,
     required TransportType transportType,
     Map<String, String>? headers,
     String? accessToken,
-    required int handleShakeResponseTimeoutInMilliseconds,
-    required int keepAliveIntervalInMilliseconds,
-    required int serverTimeoutInMilliseconds,
+    required Duration handShakeResponseTimeout,
+    required Duration keepAliveInterval,
+    required Duration serverTimeout,
   }) async {
-    await _hubConnectionManagerManager.createHubConnectionManager(
-      id: hubConnectionManagerId,
-      baseUrl: baseUrl,
-      transportType: transportType,
-      headers: headers,
-      accessToken: accessToken,
-      handleShakeResponseTimeoutInMilliseconds:
-          handleShakeResponseTimeoutInMilliseconds,
-      keepAliveIntervalInMilliseconds: keepAliveIntervalInMilliseconds,
-      serverTimeoutInMilliseconds: serverTimeoutInMilliseconds,
+    final HubConnectionManagerIdMessage hubConnectionManagerIdMessage =
+        await _hubConnectionManagerApi.createHubConnectionManager(
+      CreateHubConnectionManagerMessage(
+        baseUrl: baseUrl,
+        transportType: transportType.toTransportTypeMessage(),
+        headers: headers,
+        accessToken: accessToken,
+        handShakeResponseTimeoutInMilliseconds:
+            handShakeResponseTimeout.inMilliseconds,
+        keepAliveIntervalInMilliseconds: keepAliveInterval.inMilliseconds,
+        serverTimeoutInMilliseconds: serverTimeout.inMilliseconds,
+      ),
     );
-    _hubConnectionManagers[hubConnectionManagerId] = HubConnectionManager(
-        messageChannelSuffix:
-            'com.perfektion.fsignalr.HubConnectionManager_$hubConnectionManagerId');
-  }
-
-  @override
-  Future<void> removeHubConnectionManager({required int hubId}) async {
-    await _hubConnectionManagerManager.removeHubConnectionManager(id: hubId);
-    _hubConnectionManagers.remove(hubId);
+    return hubConnectionManagerIdMessage.hubConnectionManagerId;
   }
 
   @override
   Future<void> startHubConnection({required int hubConnectionManagerId}) =>
-      _hubConnectionManagers[hubConnectionManagerId]!.startHubConnection();
+      _hubConnectionManagerApi.startHubConnection(
+        HubConnectionManagerIdMessage(
+          hubConnectionManagerId: hubConnectionManagerId,
+        ),
+      );
 
   @override
   Future<void> stopHubConnection({required int hubConnectionManagerId}) =>
-      _hubConnectionManagers[hubConnectionManagerId]!.stopHubConnection();
+      _hubConnectionManagerApi.stopHubConnection(
+        HubConnectionManagerIdMessage(
+          hubConnectionManagerId: hubConnectionManagerId,
+        ),
+      );
 
   @override
-  Future<void> disposeHubConnection({required int hubConnectionManagerId}) =>
-      _hubConnectionManagers[hubConnectionManagerId]!.dispose();
+  Future<void> disposeHubConnectionManager(
+          {required int hubConnectionManagerId}) =>
+      _hubConnectionManagerApi.disposeHubConnectionManager(
+        HubConnectionManagerIdMessage(
+          hubConnectionManagerId: hubConnectionManagerId,
+        ),
+      );
+}
+
+extension TransportTypeExtension on TransportType {
+  TransportTypeMessage toTransportTypeMessage() => switch (this) {
+        TransportType.all => TransportTypeMessage.all,
+        TransportType.webSockets => TransportTypeMessage.webSockets,
+        TransportType.longPolling => TransportTypeMessage.longPolling
+      };
 }

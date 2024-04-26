@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:fsignalr/fsignalr.dart';
+import 'package:fsignalr_example/error_view.dart';
 
 import 'chat_view.dart';
 import 'message.dart';
@@ -16,97 +19,172 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
-  Future? _processFuture;
+  Completer? _processingCompleter;
 
-  final List<Message> _messages = [];
+  final List<Message> _m1Messages = [];
+  final List<Message> _m2Messages = [];
 
-  bool _loading = false;
+  late final HubConnectionManager _m1;
+  late final HubConnectionManager _m2;
 
-  String _connectionState = 'Disconnected';
+  static const String baseUrl = 'http:192.168.1.7:5094/chatHub';
+
+  bool get _isProcessing => !(_processingCompleter?.isCompleted ?? true);
 
   @override
   void initState() {
     super.initState();
-    _startProcess();
+    _setupConnections()
+        .then((_) => _startConnections())
+        .then((_) => _stopConnections())
+        .then((_) => _startConnections())
+        .then((_) => _disposeConnections());
   }
 
-  Future<void> _startProcess() async {
-    _processFuture = Future.delayed(const Duration(seconds: 1));
+  @override
+  void dispose() {
+    _disposeConnections();
+    super.dispose();
+  }
 
-    HubConnectionManager h1 = HubConnectionManager();
-    await h1.createHubConnection(
-      baseUrl: 'http://192.168.1.7:5094/chatHub',
-      transportType: TransportType.all,
-      headers: {'token': '123'},
-      accessToken: '123',
-      handleShakeResponseTimeoutInMilliseconds: 10000,
-      keepAliveIntervalInMilliSeconds: 20000,
-      serverTimeoutInMilliSeconds: 30000,
-    );
-    await h1.startConnection();
+  Future<void> _setupConnections() async {
+    if (_isProcessing) await _processingCompleter?.future;
 
-    HubConnectionManager h2 = HubConnectionManager();
-    await h2.createHubConnection(
-      baseUrl: 'http://192.168.1.7:5094/chatHub',
-      transportType: TransportType.all,
-      headers: {'token': '123'},
-      accessToken: '123',
-      handleShakeResponseTimeoutInMilliseconds: 10000,
-      keepAliveIntervalInMilliSeconds: 20000,
-      serverTimeoutInMilliSeconds: 30000,
-    );
-    await h2.startConnection();
+    _processingCompleter = Completer();
 
-    setState(() {
-      _connectionState = 'Connected';
-    });
+    _performSetupConnections();
+
+    return _processingCompleter?.future;
+  }
+
+  Future<void> _performSetupConnections() async {
+    try {
+      _m1 = await HubConnectionManager.createHubConnection(
+        baseUrl: baseUrl,
+        transportType: TransportType.all,
+        headers: {'hubName': 'm1'},
+        accessToken: 'm1Token',
+        handShakeResponseTimeout: const Duration(seconds: 10),
+        keepAliveInterval: const Duration(seconds: 20),
+        serverTimeout: const Duration(seconds: 30),
+      );
+
+      _m2 = await HubConnectionManager.createHubConnection(
+        baseUrl: baseUrl,
+        transportType: TransportType.all,
+        headers: {'hubName': 'm2'},
+        accessToken: 'm2Token',
+        handShakeResponseTimeout: const Duration(seconds: 10),
+        keepAliveInterval: const Duration(seconds: 20),
+        serverTimeout: const Duration(seconds: 30),
+      );
+
+      _processingCompleter?.complete();
+    } catch (e) {
+      _processingCompleter?.completeError(e);
+    }
+  }
+
+  Future<void> _startConnections() async {
+    if (_isProcessing) await _processingCompleter?.future;
+
+    _processingCompleter = Completer();
+
+    _performStartConnections();
+
+    setState(() {});
+
+    return _processingCompleter?.future;
+  }
+
+  Future<void> _performStartConnections() async {
+    try {
+      await _m1.startConnection();
+      await _m2.startConnection();
+
+      _processingCompleter?.complete();
+    } catch (e) {
+      _processingCompleter?.completeError(e);
+    }
+  }
+
+  Future<void> _stopConnections() async {
+    if (_isProcessing) await _processingCompleter?.future;
+
+    _processingCompleter = Completer();
+
+    _performStopConnections();
+
+    setState(() {});
+
+    return _processingCompleter?.future;
+  }
+
+  Future<void> _performStopConnections() async {
+    try {
+      await _m1.stopConnection();
+      await _m2.stopConnection();
+
+      _processingCompleter?.complete();
+    } catch (e) {
+      _processingCompleter?.completeError(e);
+    }
+  }
+
+  Future<void> _disposeConnections() async {
+    if (_isProcessing) await _processingCompleter?.future;
+
+    _processingCompleter = Completer();
+
+    _performCloseConnections();
+
+    setState(() {});
+
+    return _processingCompleter?.future;
+  }
+
+  Future<void> _performCloseConnections() async {
+    try {
+      await _m1.dispose();
+      await _m2.dispose();
+
+      _processingCompleter?.complete();
+    } catch (e) {
+      _processingCompleter?.completeError(e);
+    }
   }
 
   @override
   Widget build(BuildContext context) => MaterialApp(
+        debugShowCheckedModeBanner: false,
         home: SafeArea(
-          child: Scaffold(
-            body: FutureBuilder(
-              future: _processFuture,
-              builder: (context, snapshot) {
-                final Widget chatView = ChatView(
-                  messages: _messages,
-                  loading: _loading,
-                  connectionState: _connectionState,
-                  onSendMessagePressed: _onSendMessagePressed,
-                );
-                return switch (snapshot.connectionState) {
-                  ConnectionState.none ||
-                  ConnectionState.active ||
-                  ConnectionState.waiting =>
-                    chatView,
-                  ConnectionState.done => snapshot.hasError
-                      ? Center(child: Text('Error: ${snapshot.error}'))
-                      : chatView,
-                };
-              },
-            ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: _startProcess,
-              child: const Icon(Icons.refresh),
-            ),
-            floatingActionButtonLocation:
-                FloatingActionButtonLocation.centerTop,
+          child: FutureBuilder(
+            future: _processingCompleter?.future,
+            builder: (context, snapshot) {
+              final Widget chatView = ChatView(
+                m1Messages: _m1Messages,
+                m2Messages: _m2Messages,
+                loading: _isProcessing,
+                connectionState:
+                    _isProcessing ? 'Processing' : 'Not Processing',
+                onM1SendMessagePressed: _onM1SendMessagePressed,
+                onM2SendMessagePressed: _onM2SendMessagePressed,
+              );
+              return switch (snapshot.connectionState) {
+                ConnectionState.none ||
+                ConnectionState.active ||
+                ConnectionState.waiting =>
+                  chatView,
+                ConnectionState.done => snapshot.hasError
+                    ? ErrorView(errorMessage: snapshot.error.toString())
+                    : chatView,
+              };
+            },
           ),
         ),
       );
 
-  Future<void> _onSendMessagePressed(messageText) async {
-    setState(() {
-      _loading = true;
+  Future<void> _onM1SendMessagePressed(messageText) async {}
 
-      Future.delayed(const Duration(seconds: 1)).then((_) {
-        _messages.add(Message(text: messageText, user: 'Android'));
-
-        _loading = false;
-
-        setState(() {});
-      });
-    });
-  }
+  Future<void> _onM2SendMessagePressed(messageText) async {}
 }

@@ -2,61 +2,72 @@ import 'package:pigeon/pigeon.dart';
 
 @ConfigurePigeon(
   PigeonOptions(
-    dartOut: 'lib/src/pigeons/fsignalr_pigeons.g.dart',
-    javaOut:
-        'android/src/main/java/com/perfektion/fsignalr/FsignalrPigeons.java',
+    dartOut: 'lib/src/pigeons/messages.g.dart',
+    javaOut: 'android/src/main/java/com/perfektion/fsignalr/Messages.java',
     javaOptions: JavaOptions(
       package: 'com.perfektion.fsignalr',
-      className: 'FsignalrPigeons',
+      className: 'Messages',
     ),
   ),
 )
 // Below is the classes and contracts that define the communication between
 // Dart and the native code.
+// @HostApi() annotates a class that will be used to send messages to the native
+// side.
+// @FlutterApi() annotates a class that will be used to receive messages from the
+// native side.
 
-/// Used to specify the transport the client will use.
-enum TransportType {
-  /// The client will use any available transport.
+enum TransportTypeMessage {
   all,
-
-  /// The client will use WebSockets to communicate with the server.
   webSockets,
-
-  /// The client will use Long Polling to communicate with the server.
   longPolling,
 }
 
-@HostApi()
-abstract class HubConnectionManagerManager {
-  @async
-  void createHubConnectionManager({
-    /// The unique id of the hub connection manager to be created.
-    required int id,
-    required String baseUrl,
-    required TransportType transportType,
-    Map<String, String>? headers,
-    String? accessToken,
-    required int handleShakeResponseTimeoutInMilliseconds,
-    required int keepAliveIntervalInMilliseconds,
-    required int serverTimeoutInMilliseconds,
-  });
+class CreateHubConnectionManagerMessage {
+  String baseUrl;
+  TransportTypeMessage transportType;
+  Map<String?, String?>? headers;
+  String? accessToken;
+  int handShakeResponseTimeoutInMilliseconds;
+  int keepAliveIntervalInMilliseconds;
+  int serverTimeoutInMilliseconds;
 
-  @async
-  void removeHubConnectionManager({
-    /// The unique id of the hub connection manager to be removed.
-    required int id,
+  CreateHubConnectionManagerMessage({
+    required this.baseUrl,
+    required this.transportType,
+    this.headers,
+    this.accessToken,
+    required this.handShakeResponseTimeoutInMilliseconds,
+    required this.keepAliveIntervalInMilliseconds,
+    required this.serverTimeoutInMilliseconds,
   });
 }
 
+class HubConnectionManagerIdMessage {
+  int hubConnectionManagerId;
+
+  HubConnectionManagerIdMessage({
+    /// The unique id of the hub connection manager.
+    required this.hubConnectionManagerId,
+  });
+}
+
+/// Used to manage hub connections managers on the native side.
 @HostApi()
-abstract class HubConnectionManager {
+abstract class HubConnectionManagerApi {
   @async
-  void startHubConnection();
+  HubConnectionManagerIdMessage createHubConnectionManager(
+    CreateHubConnectionManagerMessage msg,
+  );
 
   @async
-  void stopHubConnection();
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  void startHubConnection(HubConnectionManagerIdMessage msg);
 
-  /// Used when done with using the manager.
   @async
-  void dispose();
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  void stopHubConnection(HubConnectionManagerIdMessage msg);
+
+  @async
+  void disposeHubConnectionManager(HubConnectionManagerIdMessage msg);
 }

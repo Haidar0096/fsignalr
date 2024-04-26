@@ -1,7 +1,11 @@
 package com.perfektion.fsignalr;
 
+import static com.perfektion.fsignalr.FsignalrPluginUtils.getHubConnectionDoesNotExistMessage;
+
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,61 +15,92 @@ import io.flutter.embedding.engine.plugins.FlutterPlugin;
 /**
  * FsignalrPlugin
  */
-public class FsignalrPlugin implements FlutterPlugin, FsignalrPigeons.HubConnectionManagerManager {
-    private final Map<Integer, FsignalrPigeons.HubConnectionManager> hubConnectionManagers = new HashMap<>();
+public class FsignalrPlugin implements FlutterPlugin, Messages.HubConnectionManagerApi {
+    private static long nextHubConnectionManagerCreationId = 1;
+
+    private final Map<Long, HubConnectionManager> hubConnectionManagers = new HashMap<>();
+
+    private final Logger logger = LoggerFactory.getLogger(FsignalrPlugin.class);
+
     private FlutterPluginBinding flutterPluginBinding;
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-        FsignalrPigeons.HubConnectionManagerManager.setUp(flutterPluginBinding.getBinaryMessenger(), this);
+        Messages.HubConnectionManagerApi.setUp(flutterPluginBinding.getBinaryMessenger(), this);
         this.flutterPluginBinding = flutterPluginBinding;
     }
 
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
-        FsignalrPigeons.HubConnectionManagerManager.setUp(binding.getBinaryMessenger(), null);
+        Messages.HubConnectionManagerApi.setUp(binding.getBinaryMessenger(), null);
         this.flutterPluginBinding = null;
     }
 
-
     @Override
     public void createHubConnectionManager(
-            @NonNull Long id,
-            @NonNull String baseUrl,
-            @NonNull FsignalrPigeons.TransportType transportType,
-            @Nullable Map<String, String> headers,
-            @Nullable String accessToken,
-            @NonNull Long handleShakeResponseTimeoutInMilliseconds,
-            @NonNull Long keepAliveIntervalInMilliseconds,
-            @NonNull Long serverTimeoutInMilliseconds,
-            @NonNull FsignalrPigeons.VoidResult result
+            @NonNull Messages.CreateHubConnectionManagerMessage msg,
+            @NonNull Messages.Result<Messages.HubConnectionManagerIdMessage> result
     ) {
-        if (hubConnectionManagers.containsKey(id.intValue())) {
-            result.error(new Throwable("HubConnectionManager with id " + id + " already exists"));
-            return;
+        try {
+            final long newHubConnectionManagerId = nextHubConnectionManagerCreationId++;
+            HubConnectionManager hubConnectionManager = new HubConnectionManagerImpl(
+                    msg,
+                    flutterPluginBinding,
+                    newHubConnectionManagerId
+            );
+            hubConnectionManagers.put(newHubConnectionManagerId, hubConnectionManager);
+            logger.info(// TODO: remove this line
+                    "Created hub connection manager with id: "
+                            + newHubConnectionManagerId
+                            + ", managers count is now: "
+                            + hubConnectionManagers.size()
+            );
+            final Messages.HubConnectionManagerIdMessage successResult =
+                    new Messages.HubConnectionManagerIdMessage
+                            .Builder()
+                            .setHubConnectionManagerId(newHubConnectionManagerId)
+                            .build();
+            result.success(successResult);
+        } catch (Exception e) {
+            logger.error("Error creating hub connection manager", e);
+            result.error(e);
         }
-        FsignalrPigeons.HubConnectionManager hubConnectionManager = new HubConnectionManagerImpl(
-                id.intValue(),
-                flutterPluginBinding,
-                baseUrl,
-                transportType,
-                headers,
-                accessToken,
-                handleShakeResponseTimeoutInMilliseconds,
-                keepAliveIntervalInMilliseconds,
-                serverTimeoutInMilliseconds
-        );
-        hubConnectionManagers.put(id.intValue(), hubConnectionManager);
-        result.success();
     }
 
     @Override
-    public void removeHubConnectionManager(@NonNull Long id, @NonNull FsignalrPigeons.VoidResult result) {
-        if (!hubConnectionManagers.containsKey(id.intValue())) {
-            result.error(new Throwable("HubConnectionManager with id " + id + " does not exist"));
+    public void startHubConnection(@NonNull Messages.HubConnectionManagerIdMessage msg, @NonNull Messages.VoidResult result) {
+        final Long id = msg.getHubConnectionManagerId();
+        HubConnectionManager hubConnectionManager = hubConnectionManagers.get(id);
+        if (hubConnectionManager == null) {
+            result.error(new Throwable(getHubConnectionDoesNotExistMessage(id)));
             return;
         }
-        hubConnectionManagers.remove(id.intValue());
-        result.success();
+
+        hubConnectionManager.startHubConnection(result);
+    }
+
+    @Override
+    public void stopHubConnection(@NonNull Messages.HubConnectionManagerIdMessage msg, @NonNull Messages.VoidResult result) {
+        final Long id = msg.getHubConnectionManagerId();
+        HubConnectionManager hubConnectionManager = hubConnectionManagers.get(id);
+        if (hubConnectionManager == null) {
+            result.error(new Throwable(getHubConnectionDoesNotExistMessage(id)));
+            return;
+        }
+
+        hubConnectionManager.stopHubConnection(result);
+    }
+
+    @Override
+    public void disposeHubConnectionManager(@NonNull Messages.HubConnectionManagerIdMessage msg, @NonNull Messages.VoidResult result) {
+        final Long id = msg.getHubConnectionManagerId();
+        HubConnectionManager hubConnectionManager = hubConnectionManagers.get(id);
+        if (hubConnectionManager == null) {
+            result.error(new Throwable(getHubConnectionDoesNotExistMessage(id)));
+            return;
+        }
+
+        hubConnectionManager.dispose(result);
+        hubConnectionManagers.remove(id);
     }
 }
