@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:fsignalr/fsignalr.dart';
 import 'package:fsignalr_example/error_view.dart';
 
-import 'chat_view.dart';
 import 'message.dart';
+import 'multi_tab_chat_view.dart';
 
 void main() {
   runApp(const MainApp());
@@ -37,8 +37,7 @@ class _MainAppState extends State<MainApp> {
     _setupConnections()
         .then((_) => _startConnections())
         .then((_) => _stopConnections())
-        .then((_) => _startConnections())
-        .then((_) => _disposeConnections());
+        .then((_) => _startConnections());
   }
 
   @override
@@ -161,14 +160,20 @@ class _MainAppState extends State<MainApp> {
           child: FutureBuilder(
             future: _processingCompleter?.future,
             builder: (context, snapshot) {
-              final Widget chatView = ChatView(
-                m1Messages: _m1Messages,
-                m2Messages: _m2Messages,
+              final Widget chatView = MultiTabChatView(
+                multiTabChatViewTabsData: [
+                  MultiTabChatViewData(
+                    messages: _m1Messages,
+                    onSendMessagePressed: _onM1SendMessagePressed,
+                    hubName: 'First Hub',
+                  ),
+                  MultiTabChatViewData(
+                    messages: _m2Messages,
+                    onSendMessagePressed: _onM2SendMessagePressed,
+                    hubName: 'Second Hub',
+                  ),
+                ],
                 loading: _isProcessing,
-                connectionState:
-                    _isProcessing ? 'Processing' : 'Not Processing',
-                onM1SendMessagePressed: _onM1SendMessagePressed,
-                onM2SendMessagePressed: _onM2SendMessagePressed,
               );
               return switch (snapshot.connectionState) {
                 ConnectionState.none ||
