@@ -68,7 +68,7 @@ class InvokeMessage {
 
 /// Used to manage hub connections managers on the native side.
 @HostApi()
-abstract class HubConnectionManagerApi {
+abstract class HubConnectionManagerNativeApi {
   @async
   HubConnectionManagerIdMessage createHubConnectionManager(
     CreateHubConnectionManagerMessage msg,

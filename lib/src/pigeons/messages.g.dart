@@ -124,8 +124,8 @@ class InvokeMessage {
   }
 }
 
-class _HubConnectionManagerApiCodec extends StandardMessageCodec {
-  const _HubConnectionManagerApiCodec();
+class _HubConnectionManagerNativeApiCodec extends StandardMessageCodec {
+  const _HubConnectionManagerNativeApiCodec();
   @override
   void writeValue(WriteBuffer buffer, Object? value) {
     if (value is CreateHubConnectionManagerMessage) {
@@ -158,21 +158,21 @@ class _HubConnectionManagerApiCodec extends StandardMessageCodec {
 }
 
 /// Used to manage hub connections managers on the native side.
-class HubConnectionManagerApi {
-  /// Constructor for [HubConnectionManagerApi].  The [binaryMessenger] named argument is
+class HubConnectionManagerNativeApi {
+  /// Constructor for [HubConnectionManagerNativeApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  HubConnectionManagerApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+  HubConnectionManagerNativeApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
       : __pigeon_binaryMessenger = binaryMessenger,
         __pigeon_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
   final BinaryMessenger? __pigeon_binaryMessenger;
 
-  static const MessageCodec<Object?> pigeonChannelCodec = _HubConnectionManagerApiCodec();
+  static const MessageCodec<Object?> pigeonChannelCodec = _HubConnectionManagerNativeApiCodec();
 
   final String __pigeon_messageChannelSuffix;
 
   Future<HubConnectionManagerIdMessage> createHubConnectionManager(CreateHubConnectionManagerMessage msg) async {
-    final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.HubConnectionManagerApi.createHubConnectionManager$__pigeon_messageChannelSuffix';
+    final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.HubConnectionManagerNativeApi.createHubConnectionManager$__pigeon_messageChannelSuffix';
     final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<Object?>(
       __pigeon_channelName,
       pigeonChannelCodec,
@@ -199,7 +199,7 @@ class HubConnectionManagerApi {
   }
 
   Future<void> startHubConnection(HubConnectionManagerIdMessage msg) async {
-    final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.HubConnectionManagerApi.startHubConnection$__pigeon_messageChannelSuffix';
+    final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.HubConnectionManagerNativeApi.startHubConnection$__pigeon_messageChannelSuffix';
     final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<Object?>(
       __pigeon_channelName,
       pigeonChannelCodec,
@@ -221,7 +221,7 @@ class HubConnectionManagerApi {
   }
 
   Future<void> stopHubConnection(HubConnectionManagerIdMessage msg) async {
-    final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.HubConnectionManagerApi.stopHubConnection$__pigeon_messageChannelSuffix';
+    final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.HubConnectionManagerNativeApi.stopHubConnection$__pigeon_messageChannelSuffix';
     final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<Object?>(
       __pigeon_channelName,
       pigeonChannelCodec,
@@ -243,7 +243,7 @@ class HubConnectionManagerApi {
   }
 
   Future<void> invoke(InvokeMessage msg) async {
-    final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.HubConnectionManagerApi.invoke$__pigeon_messageChannelSuffix';
+    final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.HubConnectionManagerNativeApi.invoke$__pigeon_messageChannelSuffix';
     final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<Object?>(
       __pigeon_channelName,
       pigeonChannelCodec,
@@ -265,7 +265,7 @@ class HubConnectionManagerApi {
   }
 
   Future<void> disposeHubConnectionManager(HubConnectionManagerIdMessage msg) async {
-    final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.HubConnectionManagerApi.disposeHubConnectionManager$__pigeon_messageChannelSuffix';
+    final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.HubConnectionManagerNativeApi.disposeHubConnectionManager$__pigeon_messageChannelSuffix';
     final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<Object?>(
       __pigeon_channelName,
       pigeonChannelCodec,

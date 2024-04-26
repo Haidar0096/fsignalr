@@ -15,7 +15,7 @@ import io.flutter.embedding.engine.plugins.FlutterPlugin;
 /**
  * FsignalrPlugin
  */
-public class FsignalrPlugin implements FlutterPlugin, Messages.HubConnectionManagerApi {
+public class FsignalrPlugin implements FlutterPlugin, Messages.HubConnectionManagerNativeApi {
     private static long nextHubConnectionManagerCreationId = 1;
 
     private final Map<Long, HubConnectionManager> hubConnectionManagers = new HashMap<>();
@@ -26,13 +26,13 @@ public class FsignalrPlugin implements FlutterPlugin, Messages.HubConnectionMana
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-        Messages.HubConnectionManagerApi.setUp(flutterPluginBinding.getBinaryMessenger(), this);
+        Messages.HubConnectionManagerNativeApi.setUp(flutterPluginBinding.getBinaryMessenger(), this);
         this.flutterPluginBinding = flutterPluginBinding;
     }
 
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
-        Messages.HubConnectionManagerApi.setUp(binding.getBinaryMessenger(), null);
+        Messages.HubConnectionManagerNativeApi.setUp(binding.getBinaryMessenger(), null);
         this.flutterPluginBinding = null;
     }
 

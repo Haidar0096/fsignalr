@@ -4,8 +4,8 @@ import 'pigeons/messages.g.dart';
 /// An implementation of [FsignalrPlatformInterface] that uses pigeons package.
 class PigeonsFsignalrPlatform extends FsignalrPlatformInterface {
   /// Used to communicate with the native side of the plugin.
-  final HubConnectionManagerApi _hubConnectionManagerApi =
-      HubConnectionManagerApi();
+  final HubConnectionManagerNativeApi _hubConnectionManagerNativeApi =
+      HubConnectionManagerNativeApi();
 
   @override
   Future<int> createHubConnectionManager({
@@ -18,7 +18,7 @@ class PigeonsFsignalrPlatform extends FsignalrPlatformInterface {
     required Duration serverTimeout,
   }) async {
     final HubConnectionManagerIdMessage hubConnectionManagerIdMessage =
-        await _hubConnectionManagerApi.createHubConnectionManager(
+        await _hubConnectionManagerNativeApi.createHubConnectionManager(
       CreateHubConnectionManagerMessage(
         baseUrl: baseUrl,
         transportType: transportType.toTransportTypeMessage(),
@@ -35,7 +35,7 @@ class PigeonsFsignalrPlatform extends FsignalrPlatformInterface {
 
   @override
   Future<void> startHubConnection({required int hubConnectionManagerId}) =>
-      _hubConnectionManagerApi.startHubConnection(
+      _hubConnectionManagerNativeApi.startHubConnection(
         HubConnectionManagerIdMessage(
           hubConnectionManagerId: hubConnectionManagerId,
         ),
@@ -43,7 +43,7 @@ class PigeonsFsignalrPlatform extends FsignalrPlatformInterface {
 
   @override
   Future<void> stopHubConnection({required int hubConnectionManagerId}) =>
-      _hubConnectionManagerApi.stopHubConnection(
+      _hubConnectionManagerNativeApi.stopHubConnection(
         HubConnectionManagerIdMessage(
           hubConnectionManagerId: hubConnectionManagerId,
         ),
@@ -55,7 +55,7 @@ class PigeonsFsignalrPlatform extends FsignalrPlatformInterface {
     List<String?>? args,
     required int hubConnectionManagerId,
   }) =>
-      _hubConnectionManagerApi.invoke(
+      _hubConnectionManagerNativeApi.invoke(
         InvokeMessage(
           methodName: methodName,
           args: args,
@@ -68,7 +68,7 @@ class PigeonsFsignalrPlatform extends FsignalrPlatformInterface {
   @override
   Future<void> disposeHubConnectionManager(
           {required int hubConnectionManagerId}) =>
-      _hubConnectionManagerApi.disposeHubConnectionManager(
+      _hubConnectionManagerNativeApi.disposeHubConnectionManager(
         HubConnectionManagerIdMessage(
           hubConnectionManagerId: hubConnectionManagerId,
         ),

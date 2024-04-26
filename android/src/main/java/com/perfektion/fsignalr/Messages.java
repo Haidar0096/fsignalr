@@ -444,10 +444,10 @@ public class Messages {
     void error(@NonNull Throwable error);
   }
 
-  private static class HubConnectionManagerApiCodec extends StandardMessageCodec {
-    public static final HubConnectionManagerApiCodec INSTANCE = new HubConnectionManagerApiCodec();
+  private static class HubConnectionManagerNativeApiCodec extends StandardMessageCodec {
+    public static final HubConnectionManagerNativeApiCodec INSTANCE = new HubConnectionManagerNativeApiCodec();
 
-    private HubConnectionManagerApiCodec() {}
+    private HubConnectionManagerNativeApiCodec() {}
 
     @Override
     protected Object readValueOfType(byte type, @NonNull ByteBuffer buffer) {
@@ -485,7 +485,7 @@ public class Messages {
    *
    * Generated interface from Pigeon that represents a handler of messages from Flutter.
    */
-  public interface HubConnectionManagerApi {
+  public interface HubConnectionManagerNativeApi {
 
     void createHubConnectionManager(@NonNull CreateHubConnectionManagerMessage msg, @NonNull Result<HubConnectionManagerIdMessage> result);
 
@@ -497,20 +497,20 @@ public class Messages {
 
     void disposeHubConnectionManager(@NonNull HubConnectionManagerIdMessage msg, @NonNull VoidResult result);
 
-    /** The codec used by HubConnectionManagerApi. */
+    /** The codec used by HubConnectionManagerNativeApi. */
     static @NonNull MessageCodec<Object> getCodec() {
-      return HubConnectionManagerApiCodec.INSTANCE;
+      return HubConnectionManagerNativeApiCodec.INSTANCE;
     }
-    /**Sets up an instance of `HubConnectionManagerApi` to handle messages through the `binaryMessenger`. */
-    static void setUp(@NonNull BinaryMessenger binaryMessenger, @Nullable HubConnectionManagerApi api) {
+    /**Sets up an instance of `HubConnectionManagerNativeApi` to handle messages through the `binaryMessenger`. */
+    static void setUp(@NonNull BinaryMessenger binaryMessenger, @Nullable HubConnectionManagerNativeApi api) {
       setUp(binaryMessenger, "", api);
     }
-    static void setUp(@NonNull BinaryMessenger binaryMessenger, @NonNull String messageChannelSuffix, @Nullable HubConnectionManagerApi api) {
+    static void setUp(@NonNull BinaryMessenger binaryMessenger, @NonNull String messageChannelSuffix, @Nullable HubConnectionManagerNativeApi api) {
       messageChannelSuffix = messageChannelSuffix.isEmpty() ? "" : "." + messageChannelSuffix;
       {
         BasicMessageChannel<Object> channel =
             new BasicMessageChannel<>(
-                binaryMessenger, "dev.flutter.pigeon.fsignalr.HubConnectionManagerApi.createHubConnectionManager" + messageChannelSuffix, getCodec());
+                binaryMessenger, "dev.flutter.pigeon.fsignalr.HubConnectionManagerNativeApi.createHubConnectionManager" + messageChannelSuffix, getCodec());
         if (api != null) {
           channel.setMessageHandler(
               (message, reply) -> {
@@ -540,7 +540,7 @@ public class Messages {
         BinaryMessenger.TaskQueue taskQueue = binaryMessenger.makeBackgroundTaskQueue();
         BasicMessageChannel<Object> channel =
             new BasicMessageChannel<>(
-                binaryMessenger, "dev.flutter.pigeon.fsignalr.HubConnectionManagerApi.startHubConnection" + messageChannelSuffix, getCodec(), taskQueue);
+                binaryMessenger, "dev.flutter.pigeon.fsignalr.HubConnectionManagerNativeApi.startHubConnection" + messageChannelSuffix, getCodec(), taskQueue);
         if (api != null) {
           channel.setMessageHandler(
               (message, reply) -> {
@@ -570,7 +570,7 @@ public class Messages {
         BinaryMessenger.TaskQueue taskQueue = binaryMessenger.makeBackgroundTaskQueue();
         BasicMessageChannel<Object> channel =
             new BasicMessageChannel<>(
-                binaryMessenger, "dev.flutter.pigeon.fsignalr.HubConnectionManagerApi.stopHubConnection" + messageChannelSuffix, getCodec(), taskQueue);
+                binaryMessenger, "dev.flutter.pigeon.fsignalr.HubConnectionManagerNativeApi.stopHubConnection" + messageChannelSuffix, getCodec(), taskQueue);
         if (api != null) {
           channel.setMessageHandler(
               (message, reply) -> {
@@ -600,7 +600,7 @@ public class Messages {
         BinaryMessenger.TaskQueue taskQueue = binaryMessenger.makeBackgroundTaskQueue();
         BasicMessageChannel<Object> channel =
             new BasicMessageChannel<>(
-                binaryMessenger, "dev.flutter.pigeon.fsignalr.HubConnectionManagerApi.invoke" + messageChannelSuffix, getCodec(), taskQueue);
+                binaryMessenger, "dev.flutter.pigeon.fsignalr.HubConnectionManagerNativeApi.invoke" + messageChannelSuffix, getCodec(), taskQueue);
         if (api != null) {
           channel.setMessageHandler(
               (message, reply) -> {
@@ -630,7 +630,7 @@ public class Messages {
         BinaryMessenger.TaskQueue taskQueue = binaryMessenger.makeBackgroundTaskQueue();
         BasicMessageChannel<Object> channel =
             new BasicMessageChannel<>(
-                binaryMessenger, "dev.flutter.pigeon.fsignalr.HubConnectionManagerApi.disposeHubConnectionManager" + messageChannelSuffix, getCodec(), taskQueue);
+                binaryMessenger, "dev.flutter.pigeon.fsignalr.HubConnectionManagerNativeApi.disposeHubConnectionManager" + messageChannelSuffix, getCodec(), taskQueue);
         if (api != null) {
           channel.setMessageHandler(
               (message, reply) -> {
