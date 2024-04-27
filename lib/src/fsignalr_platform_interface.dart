@@ -1,6 +1,37 @@
+import 'package:fsignalr/src/pigeons/messages.g.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'pigeons_fsignalr_platform_interface_impl.dart';
+
+typedef HandledHubMethod = ({String methodName, int argCount});
+
+/// Used to specify the transport the client will use.
+enum TransportType {
+  /// The client will use any available transport.
+  all,
+
+  /// The client will use WebSockets to communicate with the server.
+  webSockets,
+
+  /// The client will use Long Polling to communicate with the server.
+  longPolling;
+}
+
+/// Represents the state of a hub connection.
+enum HubConnectionState {
+  connecting,
+  connected,
+  disconnected;
+
+  static HubConnectionState fromHubConnectionStateMessage(
+          HubConnectionStateMessage msg) =>
+      switch (msg) {
+        HubConnectionStateMessage.connected => HubConnectionState.connected,
+        HubConnectionStateMessage.connecting => HubConnectionState.connecting,
+        HubConnectionStateMessage.disconnected =>
+          HubConnectionState.disconnected,
+      };
+}
 
 abstract class FsignalrPlatformInterface extends PlatformInterface {
   /// Constructs a FsignalrPlatform.
@@ -31,6 +62,7 @@ abstract class FsignalrPlatformInterface extends PlatformInterface {
     required Duration handShakeResponseTimeout,
     required Duration keepAliveInterval,
     required Duration serverTimeout,
+    List<HandledHubMethod>? handledHubMethods,
   }) {
     throw UnimplementedError(
       'createHubConnectionManager() has not been implemented.',
@@ -60,16 +92,4 @@ abstract class FsignalrPlatformInterface extends PlatformInterface {
       'disposeHubConnectionManager() has not been implemented.',
     );
   }
-}
-
-/// Used to specify the transport the client will use.
-enum TransportType {
-  /// The client will use any available transport.
-  all,
-
-  /// The client will use WebSockets to communicate with the server.
-  webSockets,
-
-  /// The client will use Long Polling to communicate with the server.
-  longPolling;
 }

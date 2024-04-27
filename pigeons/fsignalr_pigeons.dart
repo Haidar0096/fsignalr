@@ -23,6 +23,16 @@ enum TransportTypeMessage {
   longPolling,
 }
 
+class HandledHubMethodMessage {
+  String methodName;
+  int argCount;
+
+  HandledHubMethodMessage({
+    required this.methodName,
+    required this.argCount,
+  });
+}
+
 class CreateHubConnectionManagerMessage {
   String baseUrl;
   TransportTypeMessage transportType;
@@ -31,15 +41,17 @@ class CreateHubConnectionManagerMessage {
   int handShakeResponseTimeoutInMilliseconds;
   int keepAliveIntervalInMilliseconds;
   int serverTimeoutInMilliseconds;
+  List<HandledHubMethodMessage?>? handledHubMethods;
 
   CreateHubConnectionManagerMessage({
     required this.baseUrl,
     required this.transportType,
-    this.headers,
-    this.accessToken,
+    required this.headers,
+    required this.accessToken,
     required this.handShakeResponseTimeoutInMilliseconds,
     required this.keepAliveIntervalInMilliseconds,
     required this.serverTimeoutInMilliseconds,
+    required this.handledHubMethods,
   });
 }
 
@@ -52,21 +64,51 @@ class HubConnectionManagerIdMessage {
   });
 }
 
-class InvokeMessage {
+class InvokeHubMethodMessage {
   String methodName;
 
   List<String?>? args;
 
   HubConnectionManagerIdMessage hubConnectionManagerIdMessage;
 
-  InvokeMessage({
+  InvokeHubMethodMessage({
     required this.methodName,
     required this.args,
     required this.hubConnectionManagerIdMessage,
   });
 }
 
-/// Used to manage hub connections managers on the native side.
+enum HubConnectionStateMessage {
+  connected,
+  connecting,
+  disconnected,
+}
+
+class OnHubConnectionStateChangedMessage {
+  HubConnectionStateMessage state;
+
+  OnHubConnectionStateChangedMessage({required this.state});
+}
+
+class OnHubConnectionClosedMessage {
+  String exceptionMessage;
+
+  OnHubConnectionClosedMessage({
+    required this.exceptionMessage,
+  });
+}
+
+class OnMessageReceivedMessage {
+  String methodName;
+  List<String?>? args;
+
+  OnMessageReceivedMessage({
+    required this.methodName,
+    required this.args,
+  });
+}
+
+/// Used to communicate with hub connections managers on the native side.
 @HostApi()
 abstract class HubConnectionManagerNativeApi {
   @async
@@ -84,9 +126,18 @@ abstract class HubConnectionManagerNativeApi {
 
   @async
   @TaskQueue(type: TaskQueueType.serialBackgroundThread)
-  void invoke(InvokeMessage msg);
+  void invoke(InvokeHubMethodMessage msg);
 
   @async
   @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   void disposeHubConnectionManager(HubConnectionManagerIdMessage msg);
+}
+
+@FlutterApi()
+abstract class HubConnectionManagerFlutterApi {
+  void onHubConnectionStateChanged(OnHubConnectionStateChangedMessage msg);
+
+  void onConnectionClosed(OnHubConnectionClosedMessage msg);
+
+  void onMessageReceived(OnMessageReceivedMessage msg);
 }

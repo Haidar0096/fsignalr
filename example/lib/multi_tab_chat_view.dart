@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fsignalr/fsignalr.dart';
 
 import 'message.dart';
 import 'messages_list_view.dart';
@@ -6,12 +7,10 @@ import 'send_message_text_field.dart';
 
 class MultiTabChatView extends StatefulWidget {
   final List<MultiTabChatViewData> multiTabChatViewTabsData;
-  final bool loading;
 
   const MultiTabChatView({
     super.key,
     required this.multiTabChatViewTabsData,
-    required this.loading,
   });
 
   @override
@@ -24,19 +23,28 @@ class _MultiTabChatViewState extends State<MultiTabChatView> {
         (tabData) => _buildTab(
           messages: tabData.messages,
           onSendMessagePressed: tabData.onSendMessagePressed,
+          handledHubMethods: tabData.handledHubMethods,
           hintText: 'Enter a message for ${tabData.hubName}',
           hubName: tabData.hubName,
-          loading: widget.loading,
+          loading: tabData.loading,
+          connectionState: tabData.connectionState,
+          onReloadIconPressed: tabData.onReloadIconPressed,
         ),
       )
       .toList();
 
   Widget _buildTab({
     required List<Message> messages,
-    required Future<void> Function(String messageText) onSendMessagePressed,
+    required Future<void> Function({
+      required String hubMethodName,
+      required String messageText,
+    }) onSendMessagePressed,
+    required List<HandledHubMethod> handledHubMethods,
     required String hintText,
     required String hubName,
     required bool loading,
+    required HubConnectionState connectionState,
+    void Function()? onReloadIconPressed,
   }) =>
       Stack(
         children: [
@@ -47,11 +55,14 @@ class _MultiTabChatViewState extends State<MultiTabChatView> {
                   hubName: hubName,
                   messages: messages,
                   backgroundColor: Colors.grey.shade400,
+                  connectionState: connectionState,
+                  onReloadIconPressed: onReloadIconPressed,
                 ),
               ),
               SendMessageTextField(
                 hintText: hintText,
                 onSendMessagePressed: onSendMessagePressed,
+                handledHubMethods: handledHubMethods,
               ),
             ],
           ),
@@ -79,12 +90,23 @@ class _MultiTabChatViewState extends State<MultiTabChatView> {
 
 class MultiTabChatViewData {
   final List<Message> messages;
-  final Future<void> Function(String messageText) onSendMessagePressed;
+  final Future<void> Function({
+    required String hubMethodName,
+    required String messageText,
+  }) onSendMessagePressed;
+  final List<HandledHubMethod> handledHubMethods;
   final String hubName;
+  final HubConnectionState connectionState;
+  final bool loading;
+  final void Function()? onReloadIconPressed;
 
   const MultiTabChatViewData({
     required this.messages,
     required this.onSendMessagePressed,
+    required this.handledHubMethods,
     required this.hubName,
+    required this.connectionState,
+    required this.loading,
+    this.onReloadIconPressed,
   });
 }

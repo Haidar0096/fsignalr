@@ -15,10 +15,52 @@ PlatformException _createConnectionError(String channelName) {
   );
 }
 
+List<Object?> wrapResponse({Object? result, PlatformException? error, bool empty = false}) {
+  if (empty) {
+    return <Object?>[];
+  }
+  if (error == null) {
+    return <Object?>[result];
+  }
+  return <Object?>[error.code, error.message, error.details];
+}
+
 enum TransportTypeMessage {
   all,
   webSockets,
   longPolling,
+}
+
+enum HubConnectionStateMessage {
+  connected,
+  connecting,
+  disconnected,
+}
+
+class HandledHubMethodMessage {
+  HandledHubMethodMessage({
+    required this.methodName,
+    required this.argCount,
+  });
+
+  String methodName;
+
+  int argCount;
+
+  Object encode() {
+    return <Object?>[
+      methodName,
+      argCount,
+    ];
+  }
+
+  static HandledHubMethodMessage decode(Object result) {
+    result as List<Object?>;
+    return HandledHubMethodMessage(
+      methodName: result[0]! as String,
+      argCount: result[1]! as int,
+    );
+  }
 }
 
 class CreateHubConnectionManagerMessage {
@@ -30,6 +72,7 @@ class CreateHubConnectionManagerMessage {
     required this.handShakeResponseTimeoutInMilliseconds,
     required this.keepAliveIntervalInMilliseconds,
     required this.serverTimeoutInMilliseconds,
+    this.handledHubMethods,
   });
 
   String baseUrl;
@@ -46,6 +89,8 @@ class CreateHubConnectionManagerMessage {
 
   int serverTimeoutInMilliseconds;
 
+  List<HandledHubMethodMessage?>? handledHubMethods;
+
   Object encode() {
     return <Object?>[
       baseUrl,
@@ -55,6 +100,7 @@ class CreateHubConnectionManagerMessage {
       handShakeResponseTimeoutInMilliseconds,
       keepAliveIntervalInMilliseconds,
       serverTimeoutInMilliseconds,
+      handledHubMethods,
     ];
   }
 
@@ -68,6 +114,7 @@ class CreateHubConnectionManagerMessage {
       handShakeResponseTimeoutInMilliseconds: result[4]! as int,
       keepAliveIntervalInMilliseconds: result[5]! as int,
       serverTimeoutInMilliseconds: result[6]! as int,
+      handledHubMethods: (result[7] as List<Object?>?)?.cast<HandledHubMethodMessage?>(),
     );
   }
 }
@@ -93,8 +140,8 @@ class HubConnectionManagerIdMessage {
   }
 }
 
-class InvokeMessage {
-  InvokeMessage({
+class InvokeHubMethodMessage {
+  InvokeHubMethodMessage({
     required this.methodName,
     this.args,
     required this.hubConnectionManagerIdMessage,
@@ -114,12 +161,80 @@ class InvokeMessage {
     ];
   }
 
-  static InvokeMessage decode(Object result) {
+  static InvokeHubMethodMessage decode(Object result) {
     result as List<Object?>;
-    return InvokeMessage(
+    return InvokeHubMethodMessage(
       methodName: result[0]! as String,
       args: (result[1] as List<Object?>?)?.cast<String?>(),
       hubConnectionManagerIdMessage: HubConnectionManagerIdMessage.decode(result[2]! as List<Object?>),
+    );
+  }
+}
+
+class OnHubConnectionStateChangedMessage {
+  OnHubConnectionStateChangedMessage({
+    required this.state,
+  });
+
+  HubConnectionStateMessage state;
+
+  Object encode() {
+    return <Object?>[
+      state.index,
+    ];
+  }
+
+  static OnHubConnectionStateChangedMessage decode(Object result) {
+    result as List<Object?>;
+    return OnHubConnectionStateChangedMessage(
+      state: HubConnectionStateMessage.values[result[0]! as int],
+    );
+  }
+}
+
+class OnHubConnectionClosedMessage {
+  OnHubConnectionClosedMessage({
+    required this.exceptionMessage,
+  });
+
+  String exceptionMessage;
+
+  Object encode() {
+    return <Object?>[
+      exceptionMessage,
+    ];
+  }
+
+  static OnHubConnectionClosedMessage decode(Object result) {
+    result as List<Object?>;
+    return OnHubConnectionClosedMessage(
+      exceptionMessage: result[0]! as String,
+    );
+  }
+}
+
+class OnMessageReceivedMessage {
+  OnMessageReceivedMessage({
+    required this.methodName,
+    this.args,
+  });
+
+  String methodName;
+
+  List<String?>? args;
+
+  Object encode() {
+    return <Object?>[
+      methodName,
+      args,
+    ];
+  }
+
+  static OnMessageReceivedMessage decode(Object result) {
+    result as List<Object?>;
+    return OnMessageReceivedMessage(
+      methodName: result[0]! as String,
+      args: (result[1] as List<Object?>?)?.cast<String?>(),
     );
   }
 }
@@ -131,11 +246,14 @@ class _HubConnectionManagerNativeApiCodec extends StandardMessageCodec {
     if (value is CreateHubConnectionManagerMessage) {
       buffer.putUint8(128);
       writeValue(buffer, value.encode());
-    } else if (value is HubConnectionManagerIdMessage) {
+    } else if (value is HandledHubMethodMessage) {
       buffer.putUint8(129);
       writeValue(buffer, value.encode());
-    } else if (value is InvokeMessage) {
+    } else if (value is HubConnectionManagerIdMessage) {
       buffer.putUint8(130);
+      writeValue(buffer, value.encode());
+    } else if (value is InvokeHubMethodMessage) {
+      buffer.putUint8(131);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -148,16 +266,18 @@ class _HubConnectionManagerNativeApiCodec extends StandardMessageCodec {
       case 128: 
         return CreateHubConnectionManagerMessage.decode(readValue(buffer)!);
       case 129: 
-        return HubConnectionManagerIdMessage.decode(readValue(buffer)!);
+        return HandledHubMethodMessage.decode(readValue(buffer)!);
       case 130: 
-        return InvokeMessage.decode(readValue(buffer)!);
+        return HubConnectionManagerIdMessage.decode(readValue(buffer)!);
+      case 131: 
+        return InvokeHubMethodMessage.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
   }
 }
 
-/// Used to manage hub connections managers on the native side.
+/// Used to communicate with hub connections managers on the native side.
 class HubConnectionManagerNativeApi {
   /// Constructor for [HubConnectionManagerNativeApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
@@ -242,7 +362,7 @@ class HubConnectionManagerNativeApi {
     }
   }
 
-  Future<void> invoke(InvokeMessage msg) async {
+  Future<void> invoke(InvokeHubMethodMessage msg) async {
     final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.HubConnectionManagerNativeApi.invoke$__pigeon_messageChannelSuffix';
     final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<Object?>(
       __pigeon_channelName,
@@ -283,6 +403,128 @@ class HubConnectionManagerNativeApi {
       );
     } else {
       return;
+    }
+  }
+}
+
+class _HubConnectionManagerFlutterApiCodec extends StandardMessageCodec {
+  const _HubConnectionManagerFlutterApiCodec();
+  @override
+  void writeValue(WriteBuffer buffer, Object? value) {
+    if (value is OnHubConnectionClosedMessage) {
+      buffer.putUint8(128);
+      writeValue(buffer, value.encode());
+    } else if (value is OnHubConnectionStateChangedMessage) {
+      buffer.putUint8(129);
+      writeValue(buffer, value.encode());
+    } else if (value is OnMessageReceivedMessage) {
+      buffer.putUint8(130);
+      writeValue(buffer, value.encode());
+    } else {
+      super.writeValue(buffer, value);
+    }
+  }
+
+  @override
+  Object? readValueOfType(int type, ReadBuffer buffer) {
+    switch (type) {
+      case 128: 
+        return OnHubConnectionClosedMessage.decode(readValue(buffer)!);
+      case 129: 
+        return OnHubConnectionStateChangedMessage.decode(readValue(buffer)!);
+      case 130: 
+        return OnMessageReceivedMessage.decode(readValue(buffer)!);
+      default:
+        return super.readValueOfType(type, buffer);
+    }
+  }
+}
+
+abstract class HubConnectionManagerFlutterApi {
+  static const MessageCodec<Object?> pigeonChannelCodec = _HubConnectionManagerFlutterApiCodec();
+
+  void onHubConnectionStateChanged(OnHubConnectionStateChangedMessage msg);
+
+  void onConnectionClosed(OnHubConnectionClosedMessage msg);
+
+  void onMessageReceived(OnMessageReceivedMessage msg);
+
+  static void setUp(HubConnectionManagerFlutterApi? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+    {
+      final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onHubConnectionStateChanged$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        __pigeon_channel.setMessageHandler(null);
+      } else {
+        __pigeon_channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onHubConnectionStateChanged was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final OnHubConnectionStateChangedMessage? arg_msg = (args[0] as OnHubConnectionStateChangedMessage?);
+          assert(arg_msg != null,
+              'Argument for dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onHubConnectionStateChanged was null, expected non-null OnHubConnectionStateChangedMessage.');
+          try {
+            api.onHubConnectionStateChanged(arg_msg!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onConnectionClosed$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        __pigeon_channel.setMessageHandler(null);
+      } else {
+        __pigeon_channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onConnectionClosed was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final OnHubConnectionClosedMessage? arg_msg = (args[0] as OnHubConnectionClosedMessage?);
+          assert(arg_msg != null,
+              'Argument for dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onConnectionClosed was null, expected non-null OnHubConnectionClosedMessage.');
+          try {
+            api.onConnectionClosed(arg_msg!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onMessageReceived$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        __pigeon_channel.setMessageHandler(null);
+      } else {
+        __pigeon_channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onMessageReceived was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final OnMessageReceivedMessage? arg_msg = (args[0] as OnMessageReceivedMessage?);
+          assert(arg_msg != null,
+              'Argument for dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onMessageReceived was null, expected non-null OnMessageReceivedMessage.');
+          try {
+            api.onMessageReceived(arg_msg!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
     }
   }
 }

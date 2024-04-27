@@ -92,7 +92,7 @@ public class FsignalrPlugin implements FlutterPlugin, Messages.HubConnectionMana
     }
 
     @Override
-    public void invoke(@NonNull Messages.InvokeMessage msg, @NonNull Messages.VoidResult result) {
+    public void invoke(@NonNull Messages.InvokeHubMethodMessage msg, @NonNull Messages.VoidResult result) {
         final Long id = msg.getHubConnectionManagerIdMessage().getHubConnectionManagerId();
         HubConnectionManager hubConnectionManager = hubConnectionManagers.get(id);
         if (hubConnectionManager == null) {

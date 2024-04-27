@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:fsignalr/fsignalr.dart';
 
 import 'message.dart';
+import 'message_tile.dart';
 
 class MessagesListView extends StatelessWidget {
   final List<Message> messages;
   final Color backgroundColor;
   final String hubName;
+  final HubConnectionState connectionState;
+  final void Function()? onReloadIconPressed;
 
   const MessagesListView({
     super.key,
     required this.messages,
     this.backgroundColor = Colors.white,
     required this.hubName,
+    required this.connectionState,
+    this.onReloadIconPressed,
   });
 
   @override
@@ -19,18 +25,13 @@ class MessagesListView extends StatelessWidget {
         color: backgroundColor,
         child: Stack(
           children: [
-            ListView.builder(
-              itemCount: messages.length,
-              itemBuilder: (context, index) => ListTile(
-                title: Text(
-                  _getMessageDisplayText(messages[index].text),
-                ),
-                subtitle: Text(
-                  messages[index].user ?? '[Unknown user]',
-                  style: const TextStyle(
-                    fontStyle: FontStyle.italic,
-                    fontWeight: FontWeight.bold,
-                  ),
+            Padding(
+              padding: const EdgeInsets.only(top: 50),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: messages.length,
+                itemBuilder: (context, index) => MessageTile(
+                  message: messages[index],
                 ),
               ),
             ),
@@ -42,17 +43,20 @@ class MessagesListView extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 padding: const EdgeInsets.all(8.0),
-                child: Text(hubName),
+                child: Text('$hubName: $connectionState'),
+              ),
+            ),
+            Align(
+              alignment: Alignment.topRight,
+              child: GestureDetector(
+                onTap: onReloadIconPressed,
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Icon(Icons.refresh),
+                ),
               ),
             ),
           ],
         ),
       );
-
-  String _getMessageDisplayText(String? messageText) {
-    if (messageText == null || messageText.isEmpty) {
-      return '[Empty message]';
-    }
-    return messageText;
-  }
 }

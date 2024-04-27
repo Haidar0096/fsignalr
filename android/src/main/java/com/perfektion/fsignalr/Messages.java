@@ -62,6 +62,11 @@ public class Messages {
     return errorList;
   }
 
+  @NonNull
+  protected static FlutterError createConnectionError(@NonNull String channelName) {
+    return new FlutterError("channel-error",  "Unable to establish connection on channel: " + channelName + ".", "");
+  }
+
   @Target(METHOD)
   @Retention(CLASS)
   @interface CanIgnoreReturnValue {}
@@ -75,6 +80,93 @@ public class Messages {
 
     private TransportTypeMessage(final int index) {
       this.index = index;
+    }
+  }
+
+  public enum HubConnectionStateMessage {
+    CONNECTED(0),
+    CONNECTING(1),
+    DISCONNECTED(2);
+
+    final int index;
+
+    private HubConnectionStateMessage(final int index) {
+      this.index = index;
+    }
+  }
+
+  /** Generated class from Pigeon that represents data sent in messages. */
+  public static final class HandledHubMethodMessage {
+    private @NonNull String methodName;
+
+    public @NonNull String getMethodName() {
+      return methodName;
+    }
+
+    public void setMethodName(@NonNull String setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"methodName\" is null.");
+      }
+      this.methodName = setterArg;
+    }
+
+    private @NonNull Long argCount;
+
+    public @NonNull Long getArgCount() {
+      return argCount;
+    }
+
+    public void setArgCount(@NonNull Long setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"argCount\" is null.");
+      }
+      this.argCount = setterArg;
+    }
+
+    /** Constructor is non-public to enforce null safety; use Builder. */
+    HandledHubMethodMessage() {}
+
+    public static final class Builder {
+
+      private @Nullable String methodName;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setMethodName(@NonNull String setterArg) {
+        this.methodName = setterArg;
+        return this;
+      }
+
+      private @Nullable Long argCount;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setArgCount(@NonNull Long setterArg) {
+        this.argCount = setterArg;
+        return this;
+      }
+
+      public @NonNull HandledHubMethodMessage build() {
+        HandledHubMethodMessage pigeonReturn = new HandledHubMethodMessage();
+        pigeonReturn.setMethodName(methodName);
+        pigeonReturn.setArgCount(argCount);
+        return pigeonReturn;
+      }
+    }
+
+    @NonNull
+    ArrayList<Object> toList() {
+      ArrayList<Object> toListResult = new ArrayList<Object>(2);
+      toListResult.add(methodName);
+      toListResult.add(argCount);
+      return toListResult;
+    }
+
+    static @NonNull HandledHubMethodMessage fromList(@NonNull ArrayList<Object> list) {
+      HandledHubMethodMessage pigeonResult = new HandledHubMethodMessage();
+      Object methodName = list.get(0);
+      pigeonResult.setMethodName((String) methodName);
+      Object argCount = list.get(1);
+      pigeonResult.setArgCount((argCount == null) ? null : ((argCount instanceof Integer) ? (Integer) argCount : (Long) argCount));
+      return pigeonResult;
     }
   }
 
@@ -165,6 +257,16 @@ public class Messages {
       this.serverTimeoutInMilliseconds = setterArg;
     }
 
+    private @Nullable List<HandledHubMethodMessage> handledHubMethods;
+
+    public @Nullable List<HandledHubMethodMessage> getHandledHubMethods() {
+      return handledHubMethods;
+    }
+
+    public void setHandledHubMethods(@Nullable List<HandledHubMethodMessage> setterArg) {
+      this.handledHubMethods = setterArg;
+    }
+
     /** Constructor is non-public to enforce null safety; use Builder. */
     CreateHubConnectionManagerMessage() {}
 
@@ -226,6 +328,14 @@ public class Messages {
         return this;
       }
 
+      private @Nullable List<HandledHubMethodMessage> handledHubMethods;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setHandledHubMethods(@Nullable List<HandledHubMethodMessage> setterArg) {
+        this.handledHubMethods = setterArg;
+        return this;
+      }
+
       public @NonNull CreateHubConnectionManagerMessage build() {
         CreateHubConnectionManagerMessage pigeonReturn = new CreateHubConnectionManagerMessage();
         pigeonReturn.setBaseUrl(baseUrl);
@@ -235,13 +345,14 @@ public class Messages {
         pigeonReturn.setHandShakeResponseTimeoutInMilliseconds(handShakeResponseTimeoutInMilliseconds);
         pigeonReturn.setKeepAliveIntervalInMilliseconds(keepAliveIntervalInMilliseconds);
         pigeonReturn.setServerTimeoutInMilliseconds(serverTimeoutInMilliseconds);
+        pigeonReturn.setHandledHubMethods(handledHubMethods);
         return pigeonReturn;
       }
     }
 
     @NonNull
     ArrayList<Object> toList() {
-      ArrayList<Object> toListResult = new ArrayList<Object>(7);
+      ArrayList<Object> toListResult = new ArrayList<Object>(8);
       toListResult.add(baseUrl);
       toListResult.add(transportType == null ? null : transportType.index);
       toListResult.add(headers);
@@ -249,6 +360,7 @@ public class Messages {
       toListResult.add(handShakeResponseTimeoutInMilliseconds);
       toListResult.add(keepAliveIntervalInMilliseconds);
       toListResult.add(serverTimeoutInMilliseconds);
+      toListResult.add(handledHubMethods);
       return toListResult;
     }
 
@@ -268,6 +380,8 @@ public class Messages {
       pigeonResult.setKeepAliveIntervalInMilliseconds((keepAliveIntervalInMilliseconds == null) ? null : ((keepAliveIntervalInMilliseconds instanceof Integer) ? (Integer) keepAliveIntervalInMilliseconds : (Long) keepAliveIntervalInMilliseconds));
       Object serverTimeoutInMilliseconds = list.get(6);
       pigeonResult.setServerTimeoutInMilliseconds((serverTimeoutInMilliseconds == null) ? null : ((serverTimeoutInMilliseconds instanceof Integer) ? (Integer) serverTimeoutInMilliseconds : (Long) serverTimeoutInMilliseconds));
+      Object handledHubMethods = list.get(7);
+      pigeonResult.setHandledHubMethods((List<HandledHubMethodMessage>) handledHubMethods);
       return pigeonResult;
     }
   }
@@ -323,7 +437,7 @@ public class Messages {
   }
 
   /** Generated class from Pigeon that represents data sent in messages. */
-  public static final class InvokeMessage {
+  public static final class InvokeHubMethodMessage {
     private @NonNull String methodName;
 
     public @NonNull String getMethodName() {
@@ -361,7 +475,7 @@ public class Messages {
     }
 
     /** Constructor is non-public to enforce null safety; use Builder. */
-    InvokeMessage() {}
+    InvokeHubMethodMessage() {}
 
     public static final class Builder {
 
@@ -389,8 +503,8 @@ public class Messages {
         return this;
       }
 
-      public @NonNull InvokeMessage build() {
-        InvokeMessage pigeonReturn = new InvokeMessage();
+      public @NonNull InvokeHubMethodMessage build() {
+        InvokeHubMethodMessage pigeonReturn = new InvokeHubMethodMessage();
         pigeonReturn.setMethodName(methodName);
         pigeonReturn.setArgs(args);
         pigeonReturn.setHubConnectionManagerIdMessage(hubConnectionManagerIdMessage);
@@ -407,14 +521,186 @@ public class Messages {
       return toListResult;
     }
 
-    static @NonNull InvokeMessage fromList(@NonNull ArrayList<Object> list) {
-      InvokeMessage pigeonResult = new InvokeMessage();
+    static @NonNull InvokeHubMethodMessage fromList(@NonNull ArrayList<Object> list) {
+      InvokeHubMethodMessage pigeonResult = new InvokeHubMethodMessage();
       Object methodName = list.get(0);
       pigeonResult.setMethodName((String) methodName);
       Object args = list.get(1);
       pigeonResult.setArgs((List<String>) args);
       Object hubConnectionManagerIdMessage = list.get(2);
       pigeonResult.setHubConnectionManagerIdMessage((hubConnectionManagerIdMessage == null) ? null : HubConnectionManagerIdMessage.fromList((ArrayList<Object>) hubConnectionManagerIdMessage));
+      return pigeonResult;
+    }
+  }
+
+  /** Generated class from Pigeon that represents data sent in messages. */
+  public static final class OnHubConnectionStateChangedMessage {
+    private @NonNull HubConnectionStateMessage state;
+
+    public @NonNull HubConnectionStateMessage getState() {
+      return state;
+    }
+
+    public void setState(@NonNull HubConnectionStateMessage setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"state\" is null.");
+      }
+      this.state = setterArg;
+    }
+
+    /** Constructor is non-public to enforce null safety; use Builder. */
+    OnHubConnectionStateChangedMessage() {}
+
+    public static final class Builder {
+
+      private @Nullable HubConnectionStateMessage state;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setState(@NonNull HubConnectionStateMessage setterArg) {
+        this.state = setterArg;
+        return this;
+      }
+
+      public @NonNull OnHubConnectionStateChangedMessage build() {
+        OnHubConnectionStateChangedMessage pigeonReturn = new OnHubConnectionStateChangedMessage();
+        pigeonReturn.setState(state);
+        return pigeonReturn;
+      }
+    }
+
+    @NonNull
+    ArrayList<Object> toList() {
+      ArrayList<Object> toListResult = new ArrayList<Object>(1);
+      toListResult.add(state == null ? null : state.index);
+      return toListResult;
+    }
+
+    static @NonNull OnHubConnectionStateChangedMessage fromList(@NonNull ArrayList<Object> list) {
+      OnHubConnectionStateChangedMessage pigeonResult = new OnHubConnectionStateChangedMessage();
+      Object state = list.get(0);
+      pigeonResult.setState(HubConnectionStateMessage.values()[(int) state]);
+      return pigeonResult;
+    }
+  }
+
+  /** Generated class from Pigeon that represents data sent in messages. */
+  public static final class OnHubConnectionClosedMessage {
+    private @NonNull String exceptionMessage;
+
+    public @NonNull String getExceptionMessage() {
+      return exceptionMessage;
+    }
+
+    public void setExceptionMessage(@NonNull String setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"exceptionMessage\" is null.");
+      }
+      this.exceptionMessage = setterArg;
+    }
+
+    /** Constructor is non-public to enforce null safety; use Builder. */
+    OnHubConnectionClosedMessage() {}
+
+    public static final class Builder {
+
+      private @Nullable String exceptionMessage;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setExceptionMessage(@NonNull String setterArg) {
+        this.exceptionMessage = setterArg;
+        return this;
+      }
+
+      public @NonNull OnHubConnectionClosedMessage build() {
+        OnHubConnectionClosedMessage pigeonReturn = new OnHubConnectionClosedMessage();
+        pigeonReturn.setExceptionMessage(exceptionMessage);
+        return pigeonReturn;
+      }
+    }
+
+    @NonNull
+    ArrayList<Object> toList() {
+      ArrayList<Object> toListResult = new ArrayList<Object>(1);
+      toListResult.add(exceptionMessage);
+      return toListResult;
+    }
+
+    static @NonNull OnHubConnectionClosedMessage fromList(@NonNull ArrayList<Object> list) {
+      OnHubConnectionClosedMessage pigeonResult = new OnHubConnectionClosedMessage();
+      Object exceptionMessage = list.get(0);
+      pigeonResult.setExceptionMessage((String) exceptionMessage);
+      return pigeonResult;
+    }
+  }
+
+  /** Generated class from Pigeon that represents data sent in messages. */
+  public static final class OnMessageReceivedMessage {
+    private @NonNull String methodName;
+
+    public @NonNull String getMethodName() {
+      return methodName;
+    }
+
+    public void setMethodName(@NonNull String setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"methodName\" is null.");
+      }
+      this.methodName = setterArg;
+    }
+
+    private @Nullable List<String> args;
+
+    public @Nullable List<String> getArgs() {
+      return args;
+    }
+
+    public void setArgs(@Nullable List<String> setterArg) {
+      this.args = setterArg;
+    }
+
+    /** Constructor is non-public to enforce null safety; use Builder. */
+    OnMessageReceivedMessage() {}
+
+    public static final class Builder {
+
+      private @Nullable String methodName;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setMethodName(@NonNull String setterArg) {
+        this.methodName = setterArg;
+        return this;
+      }
+
+      private @Nullable List<String> args;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setArgs(@Nullable List<String> setterArg) {
+        this.args = setterArg;
+        return this;
+      }
+
+      public @NonNull OnMessageReceivedMessage build() {
+        OnMessageReceivedMessage pigeonReturn = new OnMessageReceivedMessage();
+        pigeonReturn.setMethodName(methodName);
+        pigeonReturn.setArgs(args);
+        return pigeonReturn;
+      }
+    }
+
+    @NonNull
+    ArrayList<Object> toList() {
+      ArrayList<Object> toListResult = new ArrayList<Object>(2);
+      toListResult.add(methodName);
+      toListResult.add(args);
+      return toListResult;
+    }
+
+    static @NonNull OnMessageReceivedMessage fromList(@NonNull ArrayList<Object> list) {
+      OnMessageReceivedMessage pigeonResult = new OnMessageReceivedMessage();
+      Object methodName = list.get(0);
+      pigeonResult.setMethodName((String) methodName);
+      Object args = list.get(1);
+      pigeonResult.setArgs((List<String>) args);
       return pigeonResult;
     }
   }
@@ -455,9 +741,11 @@ public class Messages {
         case (byte) 128:
           return CreateHubConnectionManagerMessage.fromList((ArrayList<Object>) readValue(buffer));
         case (byte) 129:
-          return HubConnectionManagerIdMessage.fromList((ArrayList<Object>) readValue(buffer));
+          return HandledHubMethodMessage.fromList((ArrayList<Object>) readValue(buffer));
         case (byte) 130:
-          return InvokeMessage.fromList((ArrayList<Object>) readValue(buffer));
+          return HubConnectionManagerIdMessage.fromList((ArrayList<Object>) readValue(buffer));
+        case (byte) 131:
+          return InvokeHubMethodMessage.fromList((ArrayList<Object>) readValue(buffer));
         default:
           return super.readValueOfType(type, buffer);
       }
@@ -468,12 +756,15 @@ public class Messages {
       if (value instanceof CreateHubConnectionManagerMessage) {
         stream.write(128);
         writeValue(stream, ((CreateHubConnectionManagerMessage) value).toList());
-      } else if (value instanceof HubConnectionManagerIdMessage) {
+      } else if (value instanceof HandledHubMethodMessage) {
         stream.write(129);
-        writeValue(stream, ((HubConnectionManagerIdMessage) value).toList());
-      } else if (value instanceof InvokeMessage) {
+        writeValue(stream, ((HandledHubMethodMessage) value).toList());
+      } else if (value instanceof HubConnectionManagerIdMessage) {
         stream.write(130);
-        writeValue(stream, ((InvokeMessage) value).toList());
+        writeValue(stream, ((HubConnectionManagerIdMessage) value).toList());
+      } else if (value instanceof InvokeHubMethodMessage) {
+        stream.write(131);
+        writeValue(stream, ((InvokeHubMethodMessage) value).toList());
       } else {
         super.writeValue(stream, value);
       }
@@ -481,7 +772,7 @@ public class Messages {
   }
 
   /**
-   * Used to manage hub connections managers on the native side.
+   * Used to communicate with hub connections managers on the native side.
    *
    * Generated interface from Pigeon that represents a handler of messages from Flutter.
    */
@@ -493,7 +784,7 @@ public class Messages {
 
     void stopHubConnection(@NonNull HubConnectionManagerIdMessage msg, @NonNull VoidResult result);
 
-    void invoke(@NonNull InvokeMessage msg, @NonNull VoidResult result);
+    void invoke(@NonNull InvokeHubMethodMessage msg, @NonNull VoidResult result);
 
     void disposeHubConnectionManager(@NonNull HubConnectionManagerIdMessage msg, @NonNull VoidResult result);
 
@@ -606,7 +897,7 @@ public class Messages {
               (message, reply) -> {
                 ArrayList<Object> wrapped = new ArrayList<Object>();
                 ArrayList<Object> args = (ArrayList<Object>) message;
-                InvokeMessage msgArg = (InvokeMessage) args.get(0);
+                InvokeHubMethodMessage msgArg = (InvokeHubMethodMessage) args.get(0);
                 VoidResult resultCallback =
                     new VoidResult() {
                       public void success() {
@@ -656,6 +947,122 @@ public class Messages {
           channel.setMessageHandler(null);
         }
       }
+    }
+  }
+
+  private static class HubConnectionManagerFlutterApiCodec extends StandardMessageCodec {
+    public static final HubConnectionManagerFlutterApiCodec INSTANCE = new HubConnectionManagerFlutterApiCodec();
+
+    private HubConnectionManagerFlutterApiCodec() {}
+
+    @Override
+    protected Object readValueOfType(byte type, @NonNull ByteBuffer buffer) {
+      switch (type) {
+        case (byte) 128:
+          return OnHubConnectionClosedMessage.fromList((ArrayList<Object>) readValue(buffer));
+        case (byte) 129:
+          return OnHubConnectionStateChangedMessage.fromList((ArrayList<Object>) readValue(buffer));
+        case (byte) 130:
+          return OnMessageReceivedMessage.fromList((ArrayList<Object>) readValue(buffer));
+        default:
+          return super.readValueOfType(type, buffer);
+      }
+    }
+
+    @Override
+    protected void writeValue(@NonNull ByteArrayOutputStream stream, Object value) {
+      if (value instanceof OnHubConnectionClosedMessage) {
+        stream.write(128);
+        writeValue(stream, ((OnHubConnectionClosedMessage) value).toList());
+      } else if (value instanceof OnHubConnectionStateChangedMessage) {
+        stream.write(129);
+        writeValue(stream, ((OnHubConnectionStateChangedMessage) value).toList());
+      } else if (value instanceof OnMessageReceivedMessage) {
+        stream.write(130);
+        writeValue(stream, ((OnMessageReceivedMessage) value).toList());
+      } else {
+        super.writeValue(stream, value);
+      }
+    }
+  }
+
+  /** Generated class from Pigeon that represents Flutter messages that can be called from Java. */
+  public static class HubConnectionManagerFlutterApi {
+    private final @NonNull BinaryMessenger binaryMessenger;
+    private final String messageChannelSuffix;
+
+    public HubConnectionManagerFlutterApi(@NonNull BinaryMessenger argBinaryMessenger) {
+      this(argBinaryMessenger, "");
+    }
+    public HubConnectionManagerFlutterApi(@NonNull BinaryMessenger argBinaryMessenger, @NonNull String messageChannelSuffix) {
+      this.binaryMessenger = argBinaryMessenger;
+      this.messageChannelSuffix = messageChannelSuffix.isEmpty() ? "" : "." + messageChannelSuffix;
+    }
+
+    /** Public interface for sending reply. */ 
+    /** The codec used by HubConnectionManagerFlutterApi. */
+    static @NonNull MessageCodec<Object> getCodec() {
+      return HubConnectionManagerFlutterApiCodec.INSTANCE;
+    }
+    public void onHubConnectionStateChanged(@NonNull OnHubConnectionStateChangedMessage msgArg, @NonNull VoidResult result) {
+      final String channelName = "dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onHubConnectionStateChanged" + messageChannelSuffix;
+      BasicMessageChannel<Object> channel =
+          new BasicMessageChannel<>(
+              binaryMessenger, channelName, getCodec());
+      channel.send(
+          new ArrayList<Object>(Collections.singletonList(msgArg)),
+          channelReply -> {
+            if (channelReply instanceof List) {
+              List<Object> listReply = (List<Object>) channelReply;
+              if (listReply.size() > 1) {
+                result.error(new FlutterError((String) listReply.get(0), (String) listReply.get(1), (String) listReply.get(2)));
+              } else {
+                result.success();
+              }
+            }  else {
+              result.error(createConnectionError(channelName));
+            } 
+          });
+    }
+    public void onConnectionClosed(@NonNull OnHubConnectionClosedMessage msgArg, @NonNull VoidResult result) {
+      final String channelName = "dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onConnectionClosed" + messageChannelSuffix;
+      BasicMessageChannel<Object> channel =
+          new BasicMessageChannel<>(
+              binaryMessenger, channelName, getCodec());
+      channel.send(
+          new ArrayList<Object>(Collections.singletonList(msgArg)),
+          channelReply -> {
+            if (channelReply instanceof List) {
+              List<Object> listReply = (List<Object>) channelReply;
+              if (listReply.size() > 1) {
+                result.error(new FlutterError((String) listReply.get(0), (String) listReply.get(1), (String) listReply.get(2)));
+              } else {
+                result.success();
+              }
+            }  else {
+              result.error(createConnectionError(channelName));
+            } 
+          });
+    }
+    public void onMessageReceived(@NonNull OnMessageReceivedMessage msgArg, @NonNull VoidResult result) {
+      final String channelName = "dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onMessageReceived" + messageChannelSuffix;
+      BasicMessageChannel<Object> channel =
+          new BasicMessageChannel<>(
+              binaryMessenger, channelName, getCodec());
+      channel.send(
+          new ArrayList<Object>(Collections.singletonList(msgArg)),
+          channelReply -> {
+            if (channelReply instanceof List) {
+              List<Object> listReply = (List<Object>) channelReply;
+              if (listReply.size() > 1) {
+                result.error(new FlutterError((String) listReply.get(0), (String) listReply.get(1), (String) listReply.get(2)));
+              } else {
+                result.success();
+              }
+            }  else {
+              result.error(createConnectionError(channelName));
+            } 
+          });
     }
   }
 }

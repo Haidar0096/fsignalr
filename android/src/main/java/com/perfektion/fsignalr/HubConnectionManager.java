@@ -10,7 +10,7 @@ public interface HubConnectionManager {
 
     void stopHubConnection(@NonNull Messages.VoidResult result);
 
-    void invoke(@NonNull String method, @Nullable List<String> args, @NonNull Messages.VoidResult result);
+    void invoke(@NonNull String methodName, @Nullable List<String> args, @NonNull Messages.VoidResult result);
 
     void dispose(@NonNull Messages.VoidResult result);
 }

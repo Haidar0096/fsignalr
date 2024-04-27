@@ -1,9 +1,16 @@
 class Message {
-  final String? user;
-  final String? text;
+  final String? arg1;
+  final String? arg2;
+  final MessageSource source;
 
   Message({
-    this.user,
-    this.text,
+    required this.source,
+    this.arg1,
+    this.arg2,
   });
+}
+
+enum MessageSource {
+  client,
+  server,
 }
