@@ -79,6 +79,20 @@ class PigeonsFsignalrPlatform extends FsignalrPlatformInterface {
       );
 
   @override
+  Future<void> setBaseUrl({
+    required String baseUrl,
+    required int hubConnectionManagerId,
+  }) =>
+      _hubConnectionManagerNativeApi.setBaseUrl(
+        SetBaseUrlMessage(
+          baseUrl: baseUrl,
+          hubConnectionManagerIdMessage: HubConnectionManagerIdMessage(
+            hubConnectionManagerId: hubConnectionManagerId,
+          ),
+        ),
+      );
+
+  @override
   Future<void> disposeHubConnectionManager({
     required int hubConnectionManagerId,
   }) =>

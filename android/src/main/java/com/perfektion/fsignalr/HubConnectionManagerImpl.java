@@ -288,6 +288,22 @@ public class HubConnectionManagerImpl implements HubConnectionManager {
     }
 
     @Override
+    public void setBaseUrl(@NonNull String baseUrl, @NonNull VoidResult result) {
+        try {
+            // log the current thread to console TODO: remove this line
+            logger.info("`setBaseUrl` running on thread: " + Thread.currentThread().getName() + ", id: " + id);
+
+            hubConnection.setBaseUrl(baseUrl);
+            logger.info("Hub connection base url set, id: " + id);
+
+            result.success();
+        } catch (Exception e) {
+            logger.error("Hub connection set base url failed, id: " + id, e);
+            result.error(e);
+        }
+    }
+
+    @Override
     public void dispose(@NonNull VoidResult result) {
         try {
             // log the current thread to console TODO: remove this line

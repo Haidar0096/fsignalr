@@ -1,6 +1,6 @@
-import 'package:fsignalr/src/pigeons/messages.g.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
+import 'pigeons/messages.g.dart';
 import 'pigeons_fsignalr_platform_interface_impl.dart';
 
 typedef HandledHubMethod = ({String methodName, int argCount});
@@ -83,6 +83,13 @@ abstract class FsignalrPlatformInterface extends PlatformInterface {
     required int hubConnectionManagerId,
   }) {
     throw UnimplementedError('invoke() has not been implemented.');
+  }
+
+  Future<void> setBaseUrl({
+    required String baseUrl,
+    required int hubConnectionManagerId,
+  }) {
+    throw UnimplementedError('setBaseUrl() has not been implemented.');
   }
 
   Future<void> disposeHubConnectionManager({

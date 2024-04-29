@@ -119,6 +119,12 @@ class HubConnectionManager implements HubConnectionManagerFlutterApi {
         hubConnectionManagerId: _hubConnectionManagerId,
       );
 
+  Future<void> setBaseUrl(String baseUrl) =>
+      FsignalrPlatformInterface.instance.setBaseUrl(
+        baseUrl: baseUrl,
+        hubConnectionManagerId: _hubConnectionManagerId,
+      );
+
   /// Disposes the hub connection manager. After calling this method, the
   /// instance of this class should not be used anymore.
   Future<void> dispose() =>

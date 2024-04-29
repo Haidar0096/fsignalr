@@ -12,5 +12,7 @@ public interface HubConnectionManager {
 
     void invoke(@NonNull String methodName, @Nullable List<String> args, @NonNull Messages.VoidResult result);
 
+    void setBaseUrl(@NonNull String baseUrl, @NonNull Messages.VoidResult result);
+
     void dispose(@NonNull Messages.VoidResult result);
 }

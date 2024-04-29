@@ -108,6 +108,16 @@ class OnMessageReceivedMessage {
   });
 }
 
+class SetBaseUrlMessage {
+  String baseUrl;
+  HubConnectionManagerIdMessage hubConnectionManagerIdMessage;
+
+  SetBaseUrlMessage({
+    required this.baseUrl,
+    required this.hubConnectionManagerIdMessage,
+  });
+}
+
 /// Used to communicate with hub connections managers on the native side.
 @HostApi()
 abstract class HubConnectionManagerNativeApi {
@@ -127,6 +137,10 @@ abstract class HubConnectionManagerNativeApi {
   @async
   @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   void invoke(InvokeHubMethodMessage msg);
+
+  @async
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  void setBaseUrl(SetBaseUrlMessage msg);
 
   @async
   @TaskQueue(type: TaskQueueType.serialBackgroundThread)
