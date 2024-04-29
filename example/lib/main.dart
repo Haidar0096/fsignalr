@@ -287,8 +287,12 @@ class _MainAppState extends State<MainApp> {
     try {
       await _m1.dispose();
       _m1ProcessingCompleter?.complete();
+
+      await _m2.dispose();
+      _m2ProcessingCompleter?.complete();
     } catch (e) {
       _m1ProcessingCompleter?.completeError(e);
+      _m2ProcessingCompleter?.completeError(e);
     }
   }
 
