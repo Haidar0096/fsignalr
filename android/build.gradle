@@ -29,21 +29,21 @@ android {
     compileSdk 34
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     defaultConfig {
-        minSdkVersion 20
+        minSdkVersion 24
     }
 
     dependencies {
         implementation 'com.microsoft.signalr:signalr:8.0.4'
         implementation 'org.slf4j:slf4j-api:2.0.13'
-        implementation 'org.slf4j:slf4j-simple:2.0.13'
+        implementation 'org.slf4j:slf4j-jdk14:2.0.13'
 
         testImplementation 'junit:junit:4.13.2'
-        testImplementation 'org.mockito:mockito-core:5.1.0'
+        testImplementation 'org.mockito:mockito-core:5.1.1'
     }
 
     testOptions {
