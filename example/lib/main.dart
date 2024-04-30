@@ -27,7 +27,7 @@ class _MainAppState extends State<MainApp> {
   late final HubConnectionManager _m1;
   late final HubConnectionManager _m2;
 
-  static const String baseUrl = 'http:192.168.1.3:5094/chatHub';
+  static const String baseUrl = 'http:192.168.1.2:5094/chatHub';
 
   bool _isProcessing(Completer? c) => !(c?.isCompleted ?? true);
 
@@ -60,8 +60,8 @@ class _MainAppState extends State<MainApp> {
   void initState() {
     super.initState();
     _setupConnections()
-        .then((_) => _startConnections())
         .then((_) => _stopConnections())
+        .then((_) => _startConnections())
         .then((_) => _startConnections());
   }
 
