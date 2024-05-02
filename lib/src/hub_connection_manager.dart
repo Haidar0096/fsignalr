@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'fsignalr_platform_interface.dart';
 import 'pigeons/messages.g.dart'
     show
@@ -16,22 +18,40 @@ const Duration _defaultServerTimeout = Duration(seconds: 30);
 /// ```dart
 /// import 'package:fsignalr/fsignalr.dart';
 ///
-/// enum HandledMethods {
-///   noArgsEchoMethod._('NoArgsEchoMethod', 0),
-///   oneArgEchoMethod._('OneArgEchoMethod', 1),
-///   twoArgsEchoMethod._('TwoArgsEchoMethod', 2);
+/// enum HandledMethodData {
+///   noArgsEchoMethod._('NoArgsEchoMethod', 0, noArgsMethodHandler),
+///   oneArgEchoMethod._('OneArgEchoMethod', 1, oneArgMethodHandler),
+///   twoArgsEchoMethod._('TwoArgsEchoMethod', 2, twoArgsMethodHandler);
 ///
 ///   final String methodName;
 ///   final int argsCount;
+///   final void Function(String methodName, List<String?>? args)? handler;
 ///
-///   const HandledMethods._(this.methodName, this.argsCount);
+///   const HandledMethodData._(this.methodName,
+///       this.argsCount,
+///       this.handler,);
 /// }
 ///
+/// void noArgsMethodHandler(String methodName, List<String?>? args) {
+///   print('NoArgsEchoMethod received, args: $args');
+/// }
+///
+/// void oneArgMethodHandler(String methodName, List<String?>? args) {
+///   print('OneArgEchoMethod received, args: $args');
+/// }
+///
+/// void twoArgsMethodHandler(String methodName, List<String?>? args) {
+///   print('TwoArgsEchoMethod received, args: $args');
+/// }
 ///
 /// Future<void> setUpConnection() async {
 ///   try {
 ///     // Create the hub connection manager
-///     final manager = await HubConnectionManager.createHubConnection(
+///     final HubConnectionManager manager = HubConnectionManager();
+///
+///     // Initialize the hub connection manager, this must be done
+///     // before calling any other method on the manager
+///     await manager.init(
 ///       baseUrl: 'https://myserver.com/hub',
 ///       transportType: TransportType.all,
 ///       headers: {'myHeaderKey': 'myHeaderValue'},
@@ -39,24 +59,16 @@ const Duration _defaultServerTimeout = Duration(seconds: 30);
 ///       handShakeResponseTimeout: const Duration(seconds: 10),
 ///       keepAliveInterval: const Duration(seconds: 20),
 ///       serverTimeout: const Duration(seconds: 30),
-///       handledHubMethods: [
+///       handledHubMethods: HandledMethodData.values
+///           .map(
+///             (handledMethodData) =>
 ///         (
-///         methodName: HandledMethods.noArgsEchoMethod.methodName,
-///         argCount: HandledMethods.noArgsEchoMethod.argsCount,
+///         methodName: handledMethodData.methodName,
+///         argCount: handledMethodData.argsCount,
 ///         ),
-///         (
-///         methodName: HandledMethods.oneArgEchoMethod.methodName,
-///         argCount: HandledMethods.oneArgEchoMethod.argsCount,
-///         ),
-///         (
-///         methodName: HandledMethods.twoArgsEchoMethod.methodName,
-///         argCount: HandledMethods.twoArgsEchoMethod.argsCount,
-///         )
-///       ],
+///       )
+///           .toList(),
 ///     );
-///
-///     // Start the connection
-///     await manager.startConnection();
 ///
 ///     // Listen to the connection state
 ///     manager.onHubConnectionStateChangedCallback = (state) {
@@ -65,12 +77,11 @@ const Duration _defaultServerTimeout = Duration(seconds: 30);
 ///
 ///     // listen to received messages from the server
 ///     manager.onMessageReceivedCallback = (methodName, args) {
-///       if (methodName == HandledMethods.noArgsEchoMethod.methodName) {
-///         print('NoArgsEchoMethod received, args: $args');
-///       } else if (methodName == HandledMethods.oneArgEchoMethod.methodName) {
-///         print('OneArgEchoMethod received, args: $args');
-///       } else if (methodName == HandledMethods.twoArgsEchoMethod.methodName) {
-///         print('TwoArgsEchoMethod received, args: $args');
+///       for (final handledMethodData in HandledMethodData.values) {
+///         if (methodName == handledMethodData.methodName) {
+///           handledMethodData.handler?.call(methodName, args);
+///           break;
+///         }
 ///       }
 ///     };
 ///
@@ -79,33 +90,39 @@ const Duration _defaultServerTimeout = Duration(seconds: 30);
 ///       print('Connection closed, exception: $exception');
 ///     };
 ///
+///     // Start the connection
+///     await manager.startConnection();
+///
 ///     // invoke methods on the server
-///     await hubConnectionManager.invoke(
+///     await manager.invoke(
 ///       methodName: 'MyServerMethodName',
 ///       args: ['myFirstArg', 'mySecondArg'],
 ///     );
 ///
-///    // dispose the hub connection manager when done
-///    await manager.dispose();
-///   }
-///   catch (e) {
+///     // stop the connection
+///     await manager.stopConnection();
+///
+///     // start the connection again, if you want :)
+///     await manager.startConnection();
+///
+///     // dispose the hub connection manager when done (also stops the connection)
+///     await manager.dispose();
+///   } catch (e) {
 ///     print('Error has occurred: $e');
 ///   }
 /// }
 /// ```
 class HubConnectionManager implements HubConnectionManagerFlutterApi {
   /// Represents a unique id for the hub connection managed by this instance.
-  final int _hubConnectionManagerId;
+  late final int _hubConnectionManagerId;
 
-  HubConnectionManager._(this._hubConnectionManagerId) {
-    // register this instance to listen to messages from the native side
-    // invoked on the channel of the `HubConnectionManagerFlutterApi` with
-    // the suffix of the hubConnectionManagerId.
-    HubConnectionManagerFlutterApi.setUp(
-      this,
-      messageChannelSuffix: _hubConnectionManagerId.toString(),
-    );
-  }
+  /// Indicates if there is an ongoing initialization process.
+  Completer<void>? _initializationCompleter;
+
+  /// Indicates if this instance has been initialized.
+  bool _initialized = false;
+
+  HubConnectionManager();
 
   /// Callback that is invoked when the state of the hub connection changes.
   void Function(HubConnectionState connectionState)?
@@ -142,14 +159,15 @@ class HubConnectionManager implements HubConnectionManagerFlutterApi {
   void onConnectionClosed(OnHubConnectionClosedMessage msg) =>
       onConnectionClosedCallback?.call(msg.exceptionMessage);
 
-  /// Creates a new instance of [HubConnectionManager] with the given parameters.
+  /// Initializes the [HubConnectionManager] with the given parameters.
+  /// Calling this method  more than once does nothing.
   /// - [handledHubMethods] : A list of hub methods that this instance can
   /// handle when received from the server.
   /// It is not necessary to provide a handler even if the method is in this list.
-  /// The handler can be provided later using
-  /// the [onMessageReceivedCallback] property by switching on the method name
+  /// The handler can always be provided or changed later using
+  /// the [onMessageReceivedCallback] property by **switch**ing on the method name
   /// that is passed to this callback.
-  static Future<HubConnectionManager> createHubConnection({
+  Future<void> init({
     required String baseUrl,
     required TransportType transportType,
     Map<String, String>? headers,
@@ -159,19 +177,43 @@ class HubConnectionManager implements HubConnectionManagerFlutterApi {
     Duration? serverTimeout,
     List<HandledHubMethod>? handledHubMethods,
   }) async {
-    final int hubConnectionManagerId =
-        await FsignalrPlatformInterface.instance.createHubConnectionManager(
-      baseUrl: baseUrl,
-      transportType: transportType,
-      headers: headers,
-      accessToken: accessToken,
-      handShakeResponseTimeout:
-          handShakeResponseTimeout ?? _defaultHandShakeResponseTimeout,
-      keepAliveInterval: keepAliveInterval ?? _defaultKeepAliveInterval,
-      serverTimeout: serverTimeout ?? _defaultServerTimeout,
-      handledHubMethods: handledHubMethods,
-    );
-    return HubConnectionManager._(hubConnectionManagerId);
+    if (_initialized) return;
+
+    if (_initializationCompleter != null) {
+      return _initializationCompleter!.future;
+    }
+
+    _initializationCompleter = Completer<void>();
+
+    try {
+      final int hubConnectionManagerId =
+          await FsignalrPlatformInterface.instance.createHubConnectionManager(
+        baseUrl: baseUrl,
+        transportType: transportType,
+        headers: headers,
+        accessToken: accessToken,
+        handShakeResponseTimeout:
+            handShakeResponseTimeout ?? _defaultHandShakeResponseTimeout,
+        keepAliveInterval: keepAliveInterval ?? _defaultKeepAliveInterval,
+        serverTimeout: serverTimeout ?? _defaultServerTimeout,
+        handledHubMethods: handledHubMethods,
+      );
+
+      // register this instance to listen to messages from the native side
+      // invoked on the channel of the `HubConnectionManagerFlutterApi` with
+      // the suffix of the hubConnectionManagerId.
+      HubConnectionManagerFlutterApi.setUp(
+        this,
+        messageChannelSuffix: hubConnectionManagerId.toString(),
+      );
+
+      _hubConnectionManagerId = hubConnectionManagerId;
+
+      _initialized = true;
+      _initializationCompleter!.complete();
+    } catch (e) {
+      _initializationCompleter!.completeError(e);
+    }
   }
 
   /// Starts the hub connection.

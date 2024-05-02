@@ -94,7 +94,8 @@ class _MainAppState extends State<MainApp> {
 
   Future<void> _performSetupConnections() async {
     try {
-      _m1 = await HubConnectionManager.createHubConnection(
+      _m1 = HubConnectionManager();
+      await _m1.init(
         baseUrl: baseUrl,
         transportType: TransportType.all,
         headers: {'hubName': 'm1'},
@@ -147,7 +148,8 @@ class _MainAppState extends State<MainApp> {
     }
 
     try {
-      _m2 = await HubConnectionManager.createHubConnection(
+      _m2 = HubConnectionManager();
+      await _m2.init(
         baseUrl: baseUrl,
         transportType: TransportType.all,
         headers: {'hubName': 'm2'},

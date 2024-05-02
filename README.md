@@ -7,22 +7,40 @@ Signalr client for Flutter.
 ```dart
 import 'package:fsignalr/fsignalr.dart';
 
-enum HandledMethods {
-  noArgsEchoMethod._('NoArgsEchoMethod', 0),
-  oneArgEchoMethod._('OneArgEchoMethod', 1),
-  twoArgsEchoMethod._('TwoArgsEchoMethod', 2);
+enum HandledMethodData {
+  noArgsEchoMethod._('NoArgsEchoMethod', 0, noArgsMethodHandler),
+  oneArgEchoMethod._('OneArgEchoMethod', 1, oneArgMethodHandler),
+  twoArgsEchoMethod._('TwoArgsEchoMethod', 2, twoArgsMethodHandler);
 
   final String methodName;
   final int argsCount;
+  final void Function(String methodName, List<String?>? args)? handler;
 
-  const HandledMethods._(this.methodName, this.argsCount);
+  const HandledMethodData._(this.methodName,
+      this.argsCount,
+      this.handler,);
 }
 
+void noArgsMethodHandler(String methodName, List<String?>? args) {
+  print('NoArgsEchoMethod received, args: $args');
+}
+
+void oneArgMethodHandler(String methodName, List<String?>? args) {
+  print('OneArgEchoMethod received, args: $args');
+}
+
+void twoArgsMethodHandler(String methodName, List<String?>? args) {
+  print('TwoArgsEchoMethod received, args: $args');
+}
 
 Future<void> setUpConnection() async {
   try {
     // Create the hub connection manager
-    final manager = await HubConnectionManager.createHubConnection(
+    final HubConnectionManager manager = HubConnectionManager();
+
+    // Initialize the hub connection manager, this must be done
+    // before calling any other method on the manager
+    await manager.init(
       baseUrl: 'https://myserver.com/hub',
       transportType: TransportType.all,
       headers: {'myHeaderKey': 'myHeaderValue'},
@@ -30,24 +48,16 @@ Future<void> setUpConnection() async {
       handShakeResponseTimeout: const Duration(seconds: 10),
       keepAliveInterval: const Duration(seconds: 20),
       serverTimeout: const Duration(seconds: 30),
-      handledHubMethods: [
+      handledHubMethods: HandledMethodData.values
+          .map(
+            (handledMethodData) =>
         (
-        methodName: HandledMethods.noArgsEchoMethod.methodName,
-        argCount: HandledMethods.noArgsEchoMethod.argsCount,
+        methodName: handledMethodData.methodName,
+        argCount: handledMethodData.argsCount,
         ),
-        (
-        methodName: HandledMethods.oneArgEchoMethod.methodName,
-        argCount: HandledMethods.oneArgEchoMethod.argsCount,
-        ),
-        (
-        methodName: HandledMethods.twoArgsEchoMethod.methodName,
-        argCount: HandledMethods.twoArgsEchoMethod.argsCount,
-        )
-      ],
+      )
+          .toList(),
     );
-
-    // Start the connection
-    await manager.startConnection();
 
     // Listen to the connection state
     manager.onHubConnectionStateChangedCallback = (state) {
@@ -56,12 +66,11 @@ Future<void> setUpConnection() async {
 
     // listen to received messages from the server
     manager.onMessageReceivedCallback = (methodName, args) {
-      if (methodName == HandledMethods.noArgsEchoMethod.methodName) {
-        print('NoArgsEchoMethod received, args: $args');
-      } else if (methodName == HandledMethods.oneArgEchoMethod.methodName) {
-        print('OneArgEchoMethod received, args: $args');
-      } else if (methodName == HandledMethods.twoArgsEchoMethod.methodName) {
-        print('TwoArgsEchoMethod received, args: $args');
+      for (final handledMethodData in HandledMethodData.values) {
+        if (methodName == handledMethodData.methodName) {
+          handledMethodData.handler?.call(methodName, args);
+          break;
+        }
       }
     };
 
@@ -70,16 +79,24 @@ Future<void> setUpConnection() async {
       print('Connection closed, exception: $exception');
     };
 
+    // Start the connection
+    await manager.startConnection();
+
     // invoke methods on the server
-    await hubConnectionManager.invoke(
+    await manager.invoke(
       methodName: 'MyServerMethodName',
       args: ['myFirstArg', 'mySecondArg'],
     );
 
-    // dispose the hub connection manager when done
+    // stop the connection
+    await manager.stopConnection();
+
+    // start the connection again, if you want :)
+    await manager.startConnection();
+
+    // dispose the hub connection manager when done (also stops the connection)
     await manager.dispose();
-  }
-  catch (e) {
+  } catch (e) {
     print('Error has occurred: $e');
   }
 }
