@@ -7,19 +7,35 @@ Signalr client for Flutter.
 ```dart
 import 'package:fsignalr/fsignalr.dart';
 
-enum HandledMethodData {
-  noArgsEchoMethod._('NoArgsEchoMethod', 0, noArgsMethodHandler),
-  oneArgEchoMethod._('OneArgEchoMethod', 1, oneArgMethodHandler),
-  twoArgsEchoMethod._('TwoArgsEchoMethod', 2, twoArgsMethodHandler);
-
+class HubMethodHandler {
   final String methodName;
   final int argsCount;
   final void Function(String methodName, List<String?>? args)? handler;
 
-  const HandledMethodData._(this.methodName,
-      this.argsCount,
-      this.handler,);
+  const HubMethodHandler({
+    required this.methodName,
+    required this.argsCount,
+    required this.handler,
+  });
 }
+
+const appHubMethodHandlers = [
+  HubMethodHandler(
+    methodName: 'NoArgsEchoMethod',
+    argsCount: 0,
+    handler: noArgsMethodHandler,
+  ),
+  HubMethodHandler(
+    methodName: 'OneArgEchoMethod',
+    argsCount: 1,
+    handler: oneArgMethodHandler,
+  ),
+  HubMethodHandler(
+    methodName: 'TwoArgsEchoMethod',
+    argsCount: 2,
+    handler: twoArgsMethodHandler,
+  ),
+];
 
 void noArgsMethodHandler(String methodName, List<String?>? args) {
   print('NoArgsEchoMethod received, args: $args');
@@ -48,12 +64,12 @@ Future<void> setUpConnection() async {
       handShakeResponseTimeout: const Duration(seconds: 10),
       keepAliveInterval: const Duration(seconds: 20),
       serverTimeout: const Duration(seconds: 30),
-      handledHubMethods: HandledMethodData.values
+      handledHubMethods: appHubMethodHandlers
           .map(
-            (handledMethodData) =>
+            (appHubMethodHandler) =>
         (
-        methodName: handledMethodData.methodName,
-        argCount: handledMethodData.argsCount,
+        methodName: appHubMethodHandler.methodName,
+        argCount: appHubMethodHandler.argsCount,
         ),
       )
           .toList(),
@@ -65,11 +81,14 @@ Future<void> setUpConnection() async {
     };
 
     // listen to received messages from the server
+    // this listener will only be invoked for the hub methods with names that
+    // were registered in the handledHubMethods list
     manager.onMessageReceivedCallback = (methodName, args) {
-      for (final handledMethodData in HandledMethodData.values) {
-        if (methodName == handledMethodData.methodName) {
-          handledMethodData.handler?.call(methodName, args);
-          break;
+      for (final appHubMethodHandler in appHubMethodHandlers) {
+        if (methodName == appHubMethodHandler.methodName) {
+          appHubMethodHandler.handler?.call(methodName, args);
+          break; // or you can not break if you want to call all
+          // the handlers that have the same method name
         }
       }
     };

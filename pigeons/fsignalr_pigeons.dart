@@ -16,6 +16,7 @@ import 'package:pigeon/pigeon.dart';
 // side.
 // @FlutterApi() annotates a class that will be used to receive messages from the
 // native side.
+// To run the generator, use the command `sh -e scripts/pigeon_generator.sh`
 
 enum TransportTypeMessage {
   all,

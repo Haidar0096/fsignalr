@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fsignalr/fsignalr.dart';
 
 class SendMessageTextField extends StatefulWidget {
   final Future<void> Function({
@@ -7,13 +6,13 @@ class SendMessageTextField extends StatefulWidget {
     required String messageText,
   }) onSendMessagePressed;
   final String hintText;
-  final List<HandledHubMethod> handledHubMethods;
+  final List<String> handledHubMethodsNames;
 
   const SendMessageTextField({
     super.key,
     required this.onSendMessagePressed,
     required this.hintText,
-    required this.handledHubMethods,
+    required this.handledHubMethodsNames,
   });
 
   @override
@@ -22,12 +21,12 @@ class SendMessageTextField extends StatefulWidget {
 
 class _SendMessageTextFieldState extends State<SendMessageTextField> {
   final TextEditingController _messageController = TextEditingController();
-  late HandledHubMethod _selectedHandledHubMethod;
+  late String _selectedHubMethodName;
 
   @override
   void initState() {
     super.initState();
-    _selectedHandledHubMethod = widget.handledHubMethods.first;
+    _selectedHubMethodName = widget.handledHubMethodsNames.first;
   }
 
   @override
@@ -62,7 +61,7 @@ class _SendMessageTextFieldState extends State<SendMessageTextField> {
             onPressed: () {
               widget.onSendMessagePressed(
                 messageText: _messageController.text,
-                hubMethodName: _selectedHandledHubMethod.methodName,
+                hubMethodName: _selectedHubMethodName,
               );
             },
           ),
@@ -74,20 +73,19 @@ class _SendMessageTextFieldState extends State<SendMessageTextField> {
           border: Border.all(color: Colors.black),
           borderRadius: BorderRadius.circular(8.0),
         ),
-        child: DropdownButton<HandledHubMethod>(
-          value: _selectedHandledHubMethod,
-          onChanged: (HandledHubMethod? value) {
+        child: DropdownButton<String>(
+          value: _selectedHubMethodName,
+          onChanged: (String? value) {
             if (value != null) {
-              setState(() => _selectedHandledHubMethod = value);
+              setState(() => _selectedHubMethodName = value);
             }
           },
           underline: Container(),
-          items: widget.handledHubMethods
+          items: widget.handledHubMethodsNames
               .map(
-                (HandledHubMethod handledHubMethod) =>
-                    DropdownMenuItem<HandledHubMethod>(
-                  value: handledHubMethod,
-                  child: Center(child: Text(handledHubMethod.methodName)),
+                (String handledHubMethodName) => DropdownMenuItem<String>(
+                  value: handledHubMethodName,
+                  child: Center(child: Text(handledHubMethodName)),
                 ),
               )
               .toList(),

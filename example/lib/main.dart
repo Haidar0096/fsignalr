@@ -27,38 +27,91 @@ class _MainAppState extends State<MainApp> {
   late final HubConnectionManager _m1;
   late final HubConnectionManager _m2;
 
-  static const String baseUrl = 'http:192.168.1.2:5094/chatHub';
+  static const String baseUrl =
+      'https:my_ip_address:my_port_number/my_hub_name';
 
   bool _isProcessing(Completer? c) => !(c?.isCompleted ?? true);
 
   HubConnectionState _m1ConnectionState = HubConnectionState.disconnected;
   HubConnectionState _m2ConnectionState = HubConnectionState.disconnected;
 
-  final List<HandledHubMethod> _m1HandledHubMethods = [
-    (
-      methodName: HandledMethods.noArgsEchoMethod.methodName,
-      argCount: HandledMethods.noArgsEchoMethod.argsCount,
-    ),
-    (
-      methodName: HandledMethods.oneArgEchoMethod.methodName,
-      argCount: HandledMethods.oneArgEchoMethod.argsCount,
-    ),
-    (
-      methodName: HandledMethods.twoArgsEchoMethod.methodName,
-      argCount: HandledMethods.twoArgsEchoMethod.argsCount,
-    )
-  ];
+  late final List<HubMethodHandler> _m1HubMethodHandlers;
+  late final List<HubMethodHandler> _m2HubMethodHandlers;
 
-  final List<HandledHubMethod> _m2HandledHubMethods = [
-    (
-      methodName: HandledMethods.noArgsEchoMethod.methodName,
-      argCount: HandledMethods.noArgsEchoMethod.argsCount,
-    ),
-  ];
+  Future<void> _m1NoArgsMethodHandler(List<Object?>? args) async {
+    _m1Messages.add(
+      Message(
+        source: MessageSource.server,
+        arg1: 'no arg1 (NoArgsMethod)',
+        arg2: 'no arg2 (NoArgsMethod)',
+      ),
+    );
+    setState(() {});
+  }
+
+  Future<void> _m1OneArgMethodHandler(List<Object?>? args) async {
+    _m1Messages.add(
+      Message(
+        source: MessageSource.server,
+        arg1: args![0] as String,
+        arg2: 'no arg2 (OneArgMethod)',
+      ),
+    );
+    setState(() {});
+  }
+
+  Future<void> _m1TwoArgsMethodHandler(List<Object?>? args) async {
+    _m1Messages.add(
+      Message(
+        source: MessageSource.server,
+        arg1: args![0] as String,
+        arg2: args[1] as String,
+      ),
+    );
+    setState(() {});
+  }
+
+  Future<void> _m2NoArgsMethodHandler(List<Object?>? args) async {
+    _m2Messages.add(
+      Message(
+        source: MessageSource.server,
+        arg1: 'no arg1 (NoArgsMethod)',
+        arg2: 'no arg2 (NoArgsMethod)',
+      ),
+    );
+    setState(() {});
+  }
 
   @override
   void initState() {
     super.initState();
+
+    _m1HubMethodHandlers = [
+      HubMethodHandler(
+        methodName: 'NoArgsEchoMethod',
+        argsCount: 0,
+        handler: _m1NoArgsMethodHandler,
+      ),
+      HubMethodHandler(
+        methodName: 'OneArgEchoMethod',
+        argsCount: 1,
+        handler: _m1OneArgMethodHandler,
+      ),
+      HubMethodHandler(
+        methodName: 'TwoArgsEchoMethod',
+        argsCount: 2,
+        handler: _m1TwoArgsMethodHandler,
+      ),
+    ];
+
+    _m2HubMethodHandlers = [
+      HubMethodHandler(
+        methodName: 'NoArgsEchoMethod',
+        argsCount: 0,
+        handler: _m2NoArgsMethodHandler,
+      )
+    ];
+
     _setupConnections()
         .then((_) => _stopConnections())
         .then((_) => _startConnections())
@@ -103,40 +156,24 @@ class _MainAppState extends State<MainApp> {
         handShakeResponseTimeout: const Duration(seconds: 10),
         keepAliveInterval: const Duration(seconds: 20),
         serverTimeout: const Duration(seconds: 30),
-        handledHubMethods: _m1HandledHubMethods,
+        handledHubMethods: _m1HubMethodHandlers
+            .map(
+              (m1HubMethodHandler) => (
+                methodName: m1HubMethodHandler.methodName,
+                argCount: m1HubMethodHandler.argsCount,
+              ),
+            )
+            .toList(),
       );
       _m1.onHubConnectionStateChangedCallback = (s) {
         _m1ConnectionState = s;
         setState(() {});
       };
       _m1.onMessageReceivedCallback = (methodName, args) {
-        if (methodName == HandledMethods.noArgsEchoMethod.methodName) {
-          _m1Messages.add(
-            Message(
-              source: MessageSource.server,
-              arg1: 'no arg1 (NoArgsMethod)',
-              arg2: 'no arg2 (NoArgsMethod)',
-            ),
-          );
-          setState(() {});
-        } else if (methodName == HandledMethods.oneArgEchoMethod.methodName) {
-          _m1Messages.add(
-            Message(
-              source: MessageSource.server,
-              arg1: args![0],
-              arg2: 'no arg2 (OneArgMethod)',
-            ),
-          );
-          setState(() {});
-        } else if (methodName == HandledMethods.twoArgsEchoMethod.methodName) {
-          _m1Messages.add(
-            Message(
-              source: MessageSource.server,
-              arg1: args![0],
-              arg2: args[1],
-            ),
-          );
-          setState(() {});
+        for (final hubMethodHandler in _m1HubMethodHandlers) {
+          if (methodName == hubMethodHandler.methodName) {
+            hubMethodHandler.handler(args);
+          }
         }
       };
       _m1.onConnectionClosedCallback = (exception) {
@@ -157,22 +194,24 @@ class _MainAppState extends State<MainApp> {
         handShakeResponseTimeout: const Duration(seconds: 10),
         keepAliveInterval: const Duration(seconds: 20),
         serverTimeout: const Duration(seconds: 30),
-        handledHubMethods: _m2HandledHubMethods,
+        handledHubMethods: _m2HubMethodHandlers
+            .map(
+              (m2HubMethodHandler) => (
+                methodName: m2HubMethodHandler.methodName,
+                argCount: m2HubMethodHandler.argsCount,
+              ),
+            )
+            .toList(),
       );
       _m2.onHubConnectionStateChangedCallback = (s) {
         _m2ConnectionState = s;
         setState(() {});
       };
       _m2.onMessageReceivedCallback = (methodName, args) {
-        if (methodName == HandledMethods.noArgsEchoMethod.methodName) {
-          _m2Messages.add(
-            Message(
-              source: MessageSource.server,
-              arg1: 'no arg1 (NoArgsMethod)',
-              arg2: 'no arg2 (NoArgsMethod)',
-            ),
-          );
-          setState(() {});
+        for (final hubMethodHandler in _m2HubMethodHandlers) {
+          if (methodName == hubMethodHandler.methodName) {
+            hubMethodHandler.handler(args);
+          }
         }
       };
       _m2.onConnectionClosedCallback = (exception) {
@@ -362,7 +401,9 @@ class _MainAppState extends State<MainApp> {
                 MultiTabChatViewData(
                   messages: _m1Messages,
                   onSendMessagePressed: _onM1SendMessagePressed,
-                  handledHubMethods: _m1HandledHubMethods,
+                  handledHubMethodsNames: _m1HubMethodHandlers
+                      .map((handler) => handler.methodName)
+                      .toList(),
                   hubName: 'First Hub',
                   connectionState: _m1ConnectionState,
                   loading: _isProcessing(_m1ProcessingCompleter),
@@ -371,7 +412,9 @@ class _MainAppState extends State<MainApp> {
                 MultiTabChatViewData(
                   messages: _m2Messages,
                   onSendMessagePressed: _onM2SendMessagePressed,
-                  handledHubMethods: _m2HandledHubMethods,
+                  handledHubMethodsNames: _m2HubMethodHandlers
+                      .map((handler) => handler.methodName)
+                      .toList(),
                   hubName: 'Second Hub',
                   connectionState: _m2ConnectionState,
                   loading: _isProcessing(_m2ProcessingCompleter),
@@ -469,13 +512,14 @@ class _MainAppState extends State<MainApp> {
   }
 }
 
-enum HandledMethods {
-  noArgsEchoMethod._('NoArgsEchoMethod', 0),
-  oneArgEchoMethod._('OneArgEchoMethod', 1),
-  twoArgsEchoMethod._('TwoArgsEchoMethod', 2);
-
+class HubMethodHandler {
   final String methodName;
   final int argsCount;
+  final Future<void> Function(List<Object?>? arguments) handler;
 
-  const HandledMethods._(this.methodName, this.argsCount);
+  const HubMethodHandler({
+    required this.methodName,
+    required this.argsCount,
+    required this.handler,
+  });
 }

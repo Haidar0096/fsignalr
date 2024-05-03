@@ -23,7 +23,7 @@ class _MultiTabChatViewState extends State<MultiTabChatView> {
         (tabData) => _buildTab(
           messages: tabData.messages,
           onSendMessagePressed: tabData.onSendMessagePressed,
-          handledHubMethods: tabData.handledHubMethods,
+          handledHubMethodsNames: tabData.handledHubMethodsNames,
           hintText: 'Enter a message for ${tabData.hubName}',
           hubName: tabData.hubName,
           loading: tabData.loading,
@@ -39,7 +39,7 @@ class _MultiTabChatViewState extends State<MultiTabChatView> {
       required String hubMethodName,
       required String messageText,
     }) onSendMessagePressed,
-    required List<HandledHubMethod> handledHubMethods,
+    required List<String> handledHubMethodsNames,
     required String hintText,
     required String hubName,
     required bool loading,
@@ -62,7 +62,7 @@ class _MultiTabChatViewState extends State<MultiTabChatView> {
               SendMessageTextField(
                 hintText: hintText,
                 onSendMessagePressed: onSendMessagePressed,
-                handledHubMethods: handledHubMethods,
+                handledHubMethodsNames: handledHubMethodsNames,
               ),
             ],
           ),
@@ -94,7 +94,7 @@ class MultiTabChatViewData {
     required String hubMethodName,
     required String messageText,
   }) onSendMessagePressed;
-  final List<HandledHubMethod> handledHubMethods;
+  final List<String> handledHubMethodsNames;
   final String hubName;
   final HubConnectionState connectionState;
   final bool loading;
@@ -103,7 +103,7 @@ class MultiTabChatViewData {
   const MultiTabChatViewData({
     required this.messages,
     required this.onSendMessagePressed,
-    required this.handledHubMethods,
+    required this.handledHubMethodsNames,
     required this.hubName,
     required this.connectionState,
     required this.loading,
