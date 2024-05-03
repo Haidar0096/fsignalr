@@ -158,6 +158,8 @@ class HubConnectionManager implements HubConnectionManagerFlutterApi {
 
   /// Callback that is invoked when a message is received from the server.
   /// Currently only supports string arguments, with a maximum of 2 arguments.
+  /// The callback is invoked only for the hub methods that were registered
+  /// in the [init] method.x
   void Function(String methodName, List<String?>? args)?
       onMessageReceivedCallback;
 
@@ -182,10 +184,10 @@ class HubConnectionManager implements HubConnectionManagerFlutterApi {
   /// Calling this method  more than once does nothing.
   /// - [handledHubMethods] : A list of hub methods that this instance can
   /// handle when received from the server.
-  /// It is not necessary to provide a handler even if the method is in this list.
-  /// The handler can always be provided or changed later using
-  /// the [onMessageReceivedCallback] property by **switch**ing on the method name
-  /// that is passed to this callback.
+  /// It is not obligatory to provide a handler using [onMessageReceivedCallback],
+  /// even if the method is in this list.
+  /// The handler can always be provided or changed using
+  /// the [onMessageReceivedCallback].
   Future<void> init({
     required String baseUrl,
     required TransportType transportType,
