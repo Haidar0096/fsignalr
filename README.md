@@ -134,3 +134,7 @@ Future<void> setUpConnection() async {
   the [official documentation](https://learn.microsoft.com/en-us/aspnet/core/signalr/java-client?view=aspnetcore-8.0#known-limitations)
 - Min Android sdk supported is
   20 [reason](https://learn.microsoft.com/en-us/aspnet/core/signalr/java-client?view=aspnetcore-8.0#android-development-notes)
+
+# Future Work
+- [ ] Add support for iOS
+- Expose more functionality from the SignalR client for Java (if requested)
