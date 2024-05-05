@@ -15,7 +15,8 @@ PlatformException _createConnectionError(String channelName) {
   );
 }
 
-List<Object?> wrapResponse({Object? result, PlatformException? error, bool empty = false}) {
+List<Object?> wrapResponse(
+    {Object? result, PlatformException? error, bool empty = false}) {
   if (empty) {
     return <Object?>[];
   }
@@ -114,7 +115,8 @@ class CreateHubConnectionManagerMessage {
       handShakeResponseTimeoutInMilliseconds: result[4]! as int,
       keepAliveIntervalInMilliseconds: result[5]! as int,
       serverTimeoutInMilliseconds: result[6]! as int,
-      handledHubMethods: (result[7] as List<Object?>?)?.cast<HandledHubMethodMessage?>(),
+      handledHubMethods:
+          (result[7] as List<Object?>?)?.cast<HandledHubMethodMessage?>(),
     );
   }
 }
@@ -166,7 +168,8 @@ class InvokeHubMethodMessage {
     return InvokeHubMethodMessage(
       methodName: result[0]! as String,
       args: (result[1] as List<Object?>?)?.cast<String?>(),
-      hubConnectionManagerIdMessage: HubConnectionManagerIdMessage.decode(result[2]! as List<Object?>),
+      hubConnectionManagerIdMessage:
+          HubConnectionManagerIdMessage.decode(result[2]! as List<Object?>),
     );
   }
 }
@@ -260,7 +263,8 @@ class SetBaseUrlMessage {
     result as List<Object?>;
     return SetBaseUrlMessage(
       baseUrl: result[0]! as String,
-      hubConnectionManagerIdMessage: HubConnectionManagerIdMessage.decode(result[1]! as List<Object?>),
+      hubConnectionManagerIdMessage:
+          HubConnectionManagerIdMessage.decode(result[1]! as List<Object?>),
     );
   }
 }
@@ -292,15 +296,15 @@ class _HubConnectionManagerNativeApiCodec extends StandardMessageCodec {
   @override
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
-      case 128: 
+      case 128:
         return CreateHubConnectionManagerMessage.decode(readValue(buffer)!);
-      case 129: 
+      case 129:
         return HandledHubMethodMessage.decode(readValue(buffer)!);
-      case 130: 
+      case 130:
         return HubConnectionManagerIdMessage.decode(readValue(buffer)!);
-      case 131: 
+      case 131:
         return InvokeHubMethodMessage.decode(readValue(buffer)!);
-      case 132: 
+      case 132:
         return SetBaseUrlMessage.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -313,18 +317,24 @@ class HubConnectionManagerNativeApi {
   /// Constructor for [HubConnectionManagerNativeApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  HubConnectionManagerNativeApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+  HubConnectionManagerNativeApi(
+      {BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
       : __pigeon_binaryMessenger = binaryMessenger,
-        __pigeon_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+        __pigeon_messageChannelSuffix =
+            messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
   final BinaryMessenger? __pigeon_binaryMessenger;
 
-  static const MessageCodec<Object?> pigeonChannelCodec = _HubConnectionManagerNativeApiCodec();
+  static const MessageCodec<Object?> pigeonChannelCodec =
+      _HubConnectionManagerNativeApiCodec();
 
   final String __pigeon_messageChannelSuffix;
 
-  Future<HubConnectionManagerIdMessage> createHubConnectionManager(CreateHubConnectionManagerMessage msg) async {
-    final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.HubConnectionManagerNativeApi.createHubConnectionManager$__pigeon_messageChannelSuffix';
-    final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<Object?>(
+  Future<HubConnectionManagerIdMessage> createHubConnectionManager(
+      CreateHubConnectionManagerMessage msg) async {
+    final String __pigeon_channelName =
+        'dev.flutter.pigeon.fsignalr.HubConnectionManagerNativeApi.createHubConnectionManager$__pigeon_messageChannelSuffix';
+    final BasicMessageChannel<Object?> __pigeon_channel =
+        BasicMessageChannel<Object?>(
       __pigeon_channelName,
       pigeonChannelCodec,
       binaryMessenger: __pigeon_binaryMessenger,
@@ -350,8 +360,10 @@ class HubConnectionManagerNativeApi {
   }
 
   Future<void> startHubConnection(HubConnectionManagerIdMessage msg) async {
-    final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.HubConnectionManagerNativeApi.startHubConnection$__pigeon_messageChannelSuffix';
-    final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<Object?>(
+    final String __pigeon_channelName =
+        'dev.flutter.pigeon.fsignalr.HubConnectionManagerNativeApi.startHubConnection$__pigeon_messageChannelSuffix';
+    final BasicMessageChannel<Object?> __pigeon_channel =
+        BasicMessageChannel<Object?>(
       __pigeon_channelName,
       pigeonChannelCodec,
       binaryMessenger: __pigeon_binaryMessenger,
@@ -372,8 +384,10 @@ class HubConnectionManagerNativeApi {
   }
 
   Future<void> stopHubConnection(HubConnectionManagerIdMessage msg) async {
-    final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.HubConnectionManagerNativeApi.stopHubConnection$__pigeon_messageChannelSuffix';
-    final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<Object?>(
+    final String __pigeon_channelName =
+        'dev.flutter.pigeon.fsignalr.HubConnectionManagerNativeApi.stopHubConnection$__pigeon_messageChannelSuffix';
+    final BasicMessageChannel<Object?> __pigeon_channel =
+        BasicMessageChannel<Object?>(
       __pigeon_channelName,
       pigeonChannelCodec,
       binaryMessenger: __pigeon_binaryMessenger,
@@ -394,8 +408,10 @@ class HubConnectionManagerNativeApi {
   }
 
   Future<void> invoke(InvokeHubMethodMessage msg) async {
-    final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.HubConnectionManagerNativeApi.invoke$__pigeon_messageChannelSuffix';
-    final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<Object?>(
+    final String __pigeon_channelName =
+        'dev.flutter.pigeon.fsignalr.HubConnectionManagerNativeApi.invoke$__pigeon_messageChannelSuffix';
+    final BasicMessageChannel<Object?> __pigeon_channel =
+        BasicMessageChannel<Object?>(
       __pigeon_channelName,
       pigeonChannelCodec,
       binaryMessenger: __pigeon_binaryMessenger,
@@ -416,8 +432,10 @@ class HubConnectionManagerNativeApi {
   }
 
   Future<void> setBaseUrl(SetBaseUrlMessage msg) async {
-    final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.HubConnectionManagerNativeApi.setBaseUrl$__pigeon_messageChannelSuffix';
-    final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<Object?>(
+    final String __pigeon_channelName =
+        'dev.flutter.pigeon.fsignalr.HubConnectionManagerNativeApi.setBaseUrl$__pigeon_messageChannelSuffix';
+    final BasicMessageChannel<Object?> __pigeon_channel =
+        BasicMessageChannel<Object?>(
       __pigeon_channelName,
       pigeonChannelCodec,
       binaryMessenger: __pigeon_binaryMessenger,
@@ -437,9 +455,12 @@ class HubConnectionManagerNativeApi {
     }
   }
 
-  Future<void> disposeHubConnectionManager(HubConnectionManagerIdMessage msg) async {
-    final String __pigeon_channelName = 'dev.flutter.pigeon.fsignalr.HubConnectionManagerNativeApi.disposeHubConnectionManager$__pigeon_messageChannelSuffix';
-    final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<Object?>(
+  Future<void> disposeHubConnectionManager(
+      HubConnectionManagerIdMessage msg) async {
+    final String __pigeon_channelName =
+        'dev.flutter.pigeon.fsignalr.HubConnectionManagerNativeApi.disposeHubConnectionManager$__pigeon_messageChannelSuffix';
+    final BasicMessageChannel<Object?> __pigeon_channel =
+        BasicMessageChannel<Object?>(
       __pigeon_channelName,
       pigeonChannelCodec,
       binaryMessenger: __pigeon_binaryMessenger,
@@ -481,11 +502,11 @@ class _HubConnectionManagerFlutterApiCodec extends StandardMessageCodec {
   @override
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
-      case 128: 
+      case 128:
         return OnHubConnectionClosedMessage.decode(readValue(buffer)!);
-      case 129: 
+      case 129:
         return OnHubConnectionStateChangedMessage.decode(readValue(buffer)!);
-      case 130: 
+      case 130:
         return OnMessageReceivedMessage.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -494,7 +515,8 @@ class _HubConnectionManagerFlutterApiCodec extends StandardMessageCodec {
 }
 
 abstract class HubConnectionManagerFlutterApi {
-  static const MessageCodec<Object?> pigeonChannelCodec = _HubConnectionManagerFlutterApiCodec();
+  static const MessageCodec<Object?> pigeonChannelCodec =
+      _HubConnectionManagerFlutterApiCodec();
 
   void onHubConnectionStateChanged(OnHubConnectionStateChangedMessage msg);
 
@@ -502,20 +524,28 @@ abstract class HubConnectionManagerFlutterApi {
 
   void onMessageReceived(OnMessageReceivedMessage msg);
 
-  static void setUp(HubConnectionManagerFlutterApi? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
-    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  static void setUp(
+    HubConnectionManagerFlutterApi? api, {
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) {
+    messageChannelSuffix =
+        messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
     {
-      final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onHubConnectionStateChanged$messageChannelSuffix', pigeonChannelCodec,
+      final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<
+              Object?>(
+          'dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onHubConnectionStateChanged$messageChannelSuffix',
+          pigeonChannelCodec,
           binaryMessenger: binaryMessenger);
       if (api == null) {
         __pigeon_channel.setMessageHandler(null);
       } else {
         __pigeon_channel.setMessageHandler((Object? message) async {
           assert(message != null,
-          'Argument for dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onHubConnectionStateChanged was null.');
+              'Argument for dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onHubConnectionStateChanged was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final OnHubConnectionStateChangedMessage? arg_msg = (args[0] as OnHubConnectionStateChangedMessage?);
+          final OnHubConnectionStateChangedMessage? arg_msg =
+              (args[0] as OnHubConnectionStateChangedMessage?);
           assert(arg_msg != null,
               'Argument for dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onHubConnectionStateChanged was null, expected non-null OnHubConnectionStateChangedMessage.');
           try {
@@ -523,24 +553,28 @@ abstract class HubConnectionManagerFlutterApi {
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+                error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
     }
     {
-      final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onConnectionClosed$messageChannelSuffix', pigeonChannelCodec,
+      final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<
+              Object?>(
+          'dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onConnectionClosed$messageChannelSuffix',
+          pigeonChannelCodec,
           binaryMessenger: binaryMessenger);
       if (api == null) {
         __pigeon_channel.setMessageHandler(null);
       } else {
         __pigeon_channel.setMessageHandler((Object? message) async {
           assert(message != null,
-          'Argument for dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onConnectionClosed was null.');
+              'Argument for dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onConnectionClosed was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final OnHubConnectionClosedMessage? arg_msg = (args[0] as OnHubConnectionClosedMessage?);
+          final OnHubConnectionClosedMessage? arg_msg =
+              (args[0] as OnHubConnectionClosedMessage?);
           assert(arg_msg != null,
               'Argument for dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onConnectionClosed was null, expected non-null OnHubConnectionClosedMessage.');
           try {
@@ -548,24 +582,28 @@ abstract class HubConnectionManagerFlutterApi {
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+                error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
     }
     {
-      final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onMessageReceived$messageChannelSuffix', pigeonChannelCodec,
+      final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<
+              Object?>(
+          'dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onMessageReceived$messageChannelSuffix',
+          pigeonChannelCodec,
           binaryMessenger: binaryMessenger);
       if (api == null) {
         __pigeon_channel.setMessageHandler(null);
       } else {
         __pigeon_channel.setMessageHandler((Object? message) async {
           assert(message != null,
-          'Argument for dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onMessageReceived was null.');
+              'Argument for dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onMessageReceived was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final OnMessageReceivedMessage? arg_msg = (args[0] as OnMessageReceivedMessage?);
+          final OnMessageReceivedMessage? arg_msg =
+              (args[0] as OnMessageReceivedMessage?);
           assert(arg_msg != null,
               'Argument for dev.flutter.pigeon.fsignalr.HubConnectionManagerFlutterApi.onMessageReceived was null, expected non-null OnMessageReceivedMessage.');
           try {
@@ -573,8 +611,9 @@ abstract class HubConnectionManagerFlutterApi {
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+                error: PlatformException(code: 'error', message: e.toString()));
           }
         });
       }
