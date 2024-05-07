@@ -59,7 +59,6 @@ public class HubConnectionManagerImpl implements HubConnectionManager {
             FlutterPlugin.FlutterPluginBinding flutterPluginBinding,
             long hubConnectionManagerId
     ) {
-        // log the current thread to console TODO: remove this line
         logger.info("`HubConnectionManagerImpl` constructor running on thread: " + Thread.currentThread().getName() + ", id: " + hubConnectionManagerId);
 
         HttpHubConnectionBuilder hubConnectionBuilder = HubConnectionBuilder.create(msg.getBaseUrl())
@@ -219,12 +218,9 @@ public class HubConnectionManagerImpl implements HubConnectionManager {
     @Override
     public void startHubConnection(@NonNull VoidResult result) {
         try {
-            // log the current thread to console TODO: remove this line
             logger.info("`startHubConnection` running on thread: " + Thread.currentThread().getName() + ", id: " + id);
 
             sendHubConnectionStateChangedFlutterMessage(HubConnectionState.CONNECTING);
-
-            Thread.sleep(500); // TODO: remove this line
 
             hubConnection.start().blockingAwait();
             logger.info("Hub connection started, id: " + id);
@@ -242,7 +238,6 @@ public class HubConnectionManagerImpl implements HubConnectionManager {
     @Override
     public void stopHubConnection(@NonNull VoidResult result) {
         try {
-            // log the current thread to console TODO: remove this line
             logger.info("`stopHubConnection` running on thread: " + Thread.currentThread().getName() + ", id: " + id);
 
             hubConnection.stop().blockingAwait();
@@ -261,7 +256,6 @@ public class HubConnectionManagerImpl implements HubConnectionManager {
     @Override
     public void invoke(@NonNull String methodName, @Nullable List<String> args, @NonNull VoidResult result) {
         try {
-            // log the current thread to console TODO: remove this line
             logger.info("`invoke` running on thread: " + Thread.currentThread().getName() + ", id: " + id);
 
             // create the varargs object array
@@ -290,7 +284,6 @@ public class HubConnectionManagerImpl implements HubConnectionManager {
     @Override
     public void setBaseUrl(@NonNull String baseUrl, @NonNull VoidResult result) {
         try {
-            // log the current thread to console TODO: remove this line
             logger.info("`setBaseUrl` running on thread: " + Thread.currentThread().getName() + ", id: " + id);
 
             hubConnection.setBaseUrl(baseUrl);
@@ -306,7 +299,6 @@ public class HubConnectionManagerImpl implements HubConnectionManager {
     @Override
     public void dispose(@NonNull VoidResult result) {
         try {
-            // log the current thread to console TODO: remove this line
             logger.info("`dispose` running on thread: " + Thread.currentThread().getName() + ", id: " + id);
 
             hubConnection.close();

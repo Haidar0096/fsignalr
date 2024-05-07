@@ -49,7 +49,7 @@ public class FsignalrPlugin implements FlutterPlugin, Messages.HubConnectionMana
                     newHubConnectionManagerId
             );
             hubConnectionManagers.put(newHubConnectionManagerId, hubConnectionManager);
-            logger.info(// TODO: remove this line
+            logger.info(
                     "Created hub connection manager with id: "
                             + newHubConnectionManagerId
                             + ", managers count is now: "
