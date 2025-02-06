@@ -24,7 +24,8 @@ enum HubConnectionState {
   disconnected;
 
   static HubConnectionState fromHubConnectionStateMessage(
-          HubConnectionStateMessage msg) =>
+    HubConnectionStateMessage msg,
+  ) =>
       switch (msg) {
         HubConnectionStateMessage.connected => HubConnectionState.connected,
         HubConnectionStateMessage.connecting => HubConnectionState.connecting,
