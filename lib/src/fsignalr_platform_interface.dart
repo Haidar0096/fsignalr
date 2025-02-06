@@ -70,12 +70,16 @@ abstract class FsignalrPlatformInterface extends PlatformInterface {
     );
   }
 
-  Future<void> startHubConnection({required int hubConnectionManagerId}) {
+  Future<String> startHubConnection({required int hubConnectionManagerId}) {
     throw UnimplementedError('startHubConnection() has not been implemented.');
   }
 
   Future<void> stopHubConnection({required int hubConnectionManagerId}) {
     throw UnimplementedError('stopHubConnection() has not been implemented.');
+  }
+
+  Future<String?> getConnectionId({required int hubConnectionManagerId}) {
+    throw UnimplementedError('getConnectionId() has not been implemented.');
   }
 
   Future<void> invoke({

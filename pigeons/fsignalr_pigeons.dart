@@ -129,11 +129,15 @@ abstract class HubConnectionManagerNativeApi {
 
   @async
   @TaskQueue(type: TaskQueueType.serialBackgroundThread)
-  void startHubConnection(HubConnectionManagerIdMessage msg);
+  String startHubConnection(HubConnectionManagerIdMessage msg);
 
   @async
   @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   void stopHubConnection(HubConnectionManagerIdMessage msg);
+
+  @async
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  String? getConnectionId(HubConnectionManagerIdMessage msg);
 
   @async
   @TaskQueue(type: TaskQueueType.serialBackgroundThread)

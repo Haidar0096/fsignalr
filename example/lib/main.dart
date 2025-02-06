@@ -6,6 +6,8 @@ import 'package:fsignalr/fsignalr.dart';
 import 'message.dart';
 import 'multi_tab_chat_view.dart';
 
+typedef OnConnectionStarted = void Function(String connectionId);
+
 void main() {
   runApp(const MainApp());
 }
@@ -27,8 +29,10 @@ class _MainAppState extends State<MainApp> {
   late final HubConnectionManager _m1;
   late final HubConnectionManager _m2;
 
-  static const String baseUrl =
-      'https:my_ip_address:my_port_number/my_hub_name';
+  static const String baseUrl = 'http://10.0.2.2:5094/chatHub';
+
+  String? _m1ConnectionId;
+  String? _m2ConnectionId;
 
   bool _isProcessing(Completer? c) => !(c?.isCompleted ?? true);
 
@@ -177,6 +181,7 @@ class _MainAppState extends State<MainApp> {
         }
       };
       _m1.onConnectionClosedCallback = (exception) {
+        _m1ConnectionId = null;
         debugPrint('m1: Connection closed. Exception: $exception');
       };
       _m1ProcessingCompleter?.complete();
@@ -215,6 +220,7 @@ class _MainAppState extends State<MainApp> {
         }
       };
       _m2.onConnectionClosedCallback = (exception) {
+        _m2ConnectionId = null;
         debugPrint('m2: Connection closed. Exception: $exception');
       };
       _m2ProcessingCompleter?.complete();
@@ -248,14 +254,14 @@ class _MainAppState extends State<MainApp> {
 
   Future<void> _performStartConnections() async {
     try {
-      await _m1.startConnection();
+      _m1ConnectionId = await _m1.startConnection();
       _m1ProcessingCompleter?.complete();
     } catch (e) {
       _m1ProcessingCompleter?.completeError(e);
     }
 
     try {
-      await _m2.startConnection();
+      _m2ConnectionId = await _m2.startConnection();
       _m2ProcessingCompleter?.complete();
     } catch (e) {
       _m2ProcessingCompleter?.completeError(e);
@@ -347,6 +353,7 @@ class _MainAppState extends State<MainApp> {
     _performRestartConnection(
       hubConnectionManager: _m1,
       completer: _m1ProcessingCompleter!,
+      onConnectionStarted: (id) => _m1ConnectionId = id,
     );
 
     setState(() {});
@@ -364,6 +371,7 @@ class _MainAppState extends State<MainApp> {
     _performRestartConnection(
       hubConnectionManager: _m2,
       completer: _m2ProcessingCompleter!,
+      onConnectionStarted: (id) => _m2ConnectionId = id,
     );
 
     setState(() {});
@@ -374,9 +382,11 @@ class _MainAppState extends State<MainApp> {
   Future<void> _performRestartConnection({
     required HubConnectionManager hubConnectionManager,
     required Completer completer,
+    required OnConnectionStarted onConnectionStarted,
   }) async {
     try {
-      await hubConnectionManager.startConnection();
+      final id = await hubConnectionManager.startConnection();
+      onConnectionStarted(id);
       completer.complete();
     } catch (e) {
       completer.completeError(e);
@@ -405,6 +415,7 @@ class _MainAppState extends State<MainApp> {
                       .map((handler) => handler.methodName)
                       .toList(),
                   hubName: 'First Hub',
+                  connectionId: _m1ConnectionId ?? '',
                   connectionState: _m1ConnectionState,
                   loading: _isProcessing(_m1ProcessingCompleter),
                   onReloadIconPressed: _restartFirstConnection,
@@ -416,6 +427,7 @@ class _MainAppState extends State<MainApp> {
                       .map((handler) => handler.methodName)
                       .toList(),
                   hubName: 'Second Hub',
+                  connectionId: _m2ConnectionId ?? '',
                   connectionState: _m2ConnectionState,
                   loading: _isProcessing(_m2ProcessingCompleter),
                   onReloadIconPressed: _restartSecondConnection,

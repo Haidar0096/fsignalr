@@ -238,12 +238,20 @@ class HubConnectionManager implements HubConnectionManagerFlutterApi {
   }
 
   /// Starts the hub connection.
-  Future<void> startConnection() => FsignalrPlatformInterface.instance
+  /// Returns the connectionId of the connection if the connection is started
+  /// successfully.
+  Future<String> startConnection() => FsignalrPlatformInterface.instance
       .startHubConnection(hubConnectionManagerId: _hubConnectionManagerId);
 
   /// Stops the hub connection.
   Future<void> stopConnection() => FsignalrPlatformInterface.instance
       .stopHubConnection(hubConnectionManagerId: _hubConnectionManagerId);
+
+  /// Gets the connection's connectionId.
+  /// This value will be cleared when the connection is stopped and will have a
+  /// new value every time the connection is successfully started.
+  Future<String?> getConnectionId() => FsignalrPlatformInterface.instance
+      .getConnectionId(hubConnectionManagerId: _hubConnectionManagerId);
 
   /// Invokes a method on the server with the given parameters.
   /// - [methodName] : The name of the method to invoke on the server.

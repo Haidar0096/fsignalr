@@ -26,6 +26,7 @@ class _MultiTabChatViewState extends State<MultiTabChatView> {
           handledHubMethodsNames: tabData.handledHubMethodsNames,
           hintText: 'Enter a message for ${tabData.hubName}',
           hubName: tabData.hubName,
+          connectionId: tabData.connectionId,
           loading: tabData.loading,
           connectionState: tabData.connectionState,
           onReloadIconPressed: tabData.onReloadIconPressed,
@@ -42,6 +43,7 @@ class _MultiTabChatViewState extends State<MultiTabChatView> {
     required List<String> handledHubMethodsNames,
     required String hintText,
     required String hubName,
+    required String connectionId,
     required bool loading,
     required HubConnectionState connectionState,
     void Function()? onReloadIconPressed,
@@ -53,6 +55,7 @@ class _MultiTabChatViewState extends State<MultiTabChatView> {
               Expanded(
                 child: MessagesListView(
                   hubName: hubName,
+                  connectionId: connectionId,
                   messages: messages,
                   backgroundColor: Colors.grey.shade400,
                   connectionState: connectionState,
@@ -96,6 +99,7 @@ class MultiTabChatViewData {
   }) onSendMessagePressed;
   final List<String> handledHubMethodsNames;
   final String hubName;
+  final String connectionId;
   final HubConnectionState connectionState;
   final bool loading;
   final void Function()? onReloadIconPressed;
@@ -105,6 +109,7 @@ class MultiTabChatViewData {
     required this.onSendMessagePressed,
     required this.handledHubMethodsNames,
     required this.hubName,
+    required this.connectionId,
     required this.connectionState,
     required this.loading,
     this.onReloadIconPressed,

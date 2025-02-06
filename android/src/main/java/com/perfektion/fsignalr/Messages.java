@@ -994,9 +994,11 @@ public class Messages {
 
     void createHubConnectionManager(@NonNull CreateHubConnectionManagerMessage msg, @NonNull Result<HubConnectionManagerIdMessage> result);
 
-    void startHubConnection(@NonNull HubConnectionManagerIdMessage msg, @NonNull VoidResult result);
+    void startHubConnection(@NonNull HubConnectionManagerIdMessage msg, @NonNull Result<String> result);
 
     void stopHubConnection(@NonNull HubConnectionManagerIdMessage msg, @NonNull VoidResult result);
+
+    void getConnectionId(@NonNull HubConnectionManagerIdMessage msg, @NonNull NullableResult<String> result);
 
     void invoke(@NonNull InvokeHubMethodMessage msg, @NonNull VoidResult result);
 
@@ -1054,10 +1056,10 @@ public class Messages {
                 ArrayList<Object> wrapped = new ArrayList<>();
                 ArrayList<Object> args = (ArrayList<Object>) message;
                 HubConnectionManagerIdMessage msgArg = (HubConnectionManagerIdMessage) args.get(0);
-                VoidResult resultCallback =
-                    new VoidResult() {
-                      public void success() {
-                        wrapped.add(0, null);
+                Result<String> resultCallback =
+                    new Result<String>() {
+                      public void success(String result) {
+                        wrapped.add(0, result);
                         reply.reply(wrapped);
                       }
 
@@ -1098,6 +1100,36 @@ public class Messages {
                     };
 
                 api.stopHubConnection(msgArg, resultCallback);
+              });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BinaryMessenger.TaskQueue taskQueue = binaryMessenger.makeBackgroundTaskQueue();
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(
+                binaryMessenger, "dev.flutter.pigeon.fsignalr.HubConnectionManagerNativeApi.getConnectionId" + messageChannelSuffix, getCodec(), taskQueue);
+        if (api != null) {
+          channel.setMessageHandler(
+              (message, reply) -> {
+                ArrayList<Object> wrapped = new ArrayList<>();
+                ArrayList<Object> args = (ArrayList<Object>) message;
+                HubConnectionManagerIdMessage msgArg = (HubConnectionManagerIdMessage) args.get(0);
+                NullableResult<String> resultCallback =
+                    new NullableResult<String>() {
+                      public void success(String result) {
+                        wrapped.add(0, result);
+                        reply.reply(wrapped);
+                      }
+
+                      public void error(Throwable error) {
+                        ArrayList<Object> wrappedError = wrapError(error);
+                        reply.reply(wrappedError);
+                      }
+                    };
+
+                api.getConnectionId(msgArg, resultCallback);
               });
         } else {
           channel.setMessageHandler(null);

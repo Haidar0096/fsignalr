@@ -49,11 +49,9 @@ public class FsignalrPlugin implements FlutterPlugin, Messages.HubConnectionMana
                     newHubConnectionManagerId
             );
             hubConnectionManagers.put(newHubConnectionManagerId, hubConnectionManager);
-            logger.info(
-                    "Created hub connection manager with id: "
-                            + newHubConnectionManagerId
-                            + ", managers count is now: "
-                            + hubConnectionManagers.size()
+            logger.info("Created hub connection manager with id: {}, managers count is now: {}",
+                    newHubConnectionManagerId,
+                    hubConnectionManagers.size()
             );
             final Messages.HubConnectionManagerIdMessage successResult =
                     new Messages.HubConnectionManagerIdMessage
@@ -68,7 +66,7 @@ public class FsignalrPlugin implements FlutterPlugin, Messages.HubConnectionMana
     }
 
     @Override
-    public void startHubConnection(@NonNull Messages.HubConnectionManagerIdMessage msg, @NonNull Messages.VoidResult result) {
+    public void startHubConnection(@NonNull Messages.HubConnectionManagerIdMessage msg, @NonNull Messages.Result<String> result) {
         final Long id = msg.getHubConnectionManagerId();
         HubConnectionManager hubConnectionManager = hubConnectionManagers.get(id);
         if (hubConnectionManager == null) {
@@ -89,6 +87,18 @@ public class FsignalrPlugin implements FlutterPlugin, Messages.HubConnectionMana
         }
 
         hubConnectionManager.stopHubConnection(result);
+    }
+
+    @Override
+    public void getConnectionId(@NonNull Messages.HubConnectionManagerIdMessage msg, @NonNull Messages.NullableResult<String> result) {
+        final Long id = msg.getHubConnectionManagerId();
+        HubConnectionManager hubConnectionManager = hubConnectionManagers.get(id);
+        if (hubConnectionManager == null) {
+            result.error(new Throwable(getHubConnectionManagerDoesNotExistMessage(id)));
+            return;
+        }
+
+        hubConnectionManager.getConnectionId(result);
     }
 
     @Override

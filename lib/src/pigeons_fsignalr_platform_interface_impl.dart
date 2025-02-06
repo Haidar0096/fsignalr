@@ -43,7 +43,7 @@ class PigeonsFsignalrPlatform extends FsignalrPlatformInterface {
   }
 
   @override
-  Future<void> startHubConnection({
+  Future<String> startHubConnection({
     required int hubConnectionManagerId,
   }) =>
       _hubConnectionManagerNativeApi.startHubConnection(
@@ -57,6 +57,16 @@ class PigeonsFsignalrPlatform extends FsignalrPlatformInterface {
     required int hubConnectionManagerId,
   }) =>
       _hubConnectionManagerNativeApi.stopHubConnection(
+        HubConnectionManagerIdMessage(
+          hubConnectionManagerId: hubConnectionManagerId,
+        ),
+      );
+
+  @override
+  Future<String?> getConnectionId({
+    required int hubConnectionManagerId,
+  }) =>
+      _hubConnectionManagerNativeApi.getConnectionId(
         HubConnectionManagerIdMessage(
           hubConnectionManagerId: hubConnectionManagerId,
         ),
