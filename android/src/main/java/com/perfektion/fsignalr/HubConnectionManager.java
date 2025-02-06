@@ -12,6 +12,8 @@ public interface HubConnectionManager {
 
     void getConnectionId(@NonNull Messages.NullableResult<String> result);
 
+    void getConnectionState(@NonNull Messages.Result<Messages.HubConnectionStateMessage> result);
+
     void invoke(@NonNull String methodName, @Nullable List<String> args, @NonNull Messages.VoidResult result);
 
     void setBaseUrl(@NonNull String baseUrl, @NonNull Messages.VoidResult result);

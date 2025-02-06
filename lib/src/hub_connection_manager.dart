@@ -253,6 +253,11 @@ class HubConnectionManager implements HubConnectionManagerFlutterApi {
   Future<String?> getConnectionId() => FsignalrPlatformInterface.instance
       .getConnectionId(hubConnectionManagerId: _hubConnectionManagerId);
 
+  /// Returns the connection state at the time of calling this method.
+  Future<HubConnectionState> getConnectionState() async =>
+      FsignalrPlatformInterface.instance
+          .getConnectionState(hubConnectionManagerId: _hubConnectionManagerId);
+
   /// Invokes a method on the server with the given parameters.
   /// - [methodName] : The name of the method to invoke on the server.
   /// - [args] : Optional list of arguments to pass to the server method.

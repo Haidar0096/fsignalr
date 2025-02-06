@@ -73,6 +73,21 @@ class PigeonsFsignalrPlatform extends FsignalrPlatformInterface {
       );
 
   @override
+  Future<HubConnectionState> getConnectionState({
+    required int hubConnectionManagerId,
+  }) async {
+    final connectionStateMessage =
+        await _hubConnectionManagerNativeApi.getConnectionState(
+      HubConnectionManagerIdMessage(
+        hubConnectionManagerId: hubConnectionManagerId,
+      ),
+    );
+    return HubConnectionState.fromHubConnectionStateMessage(
+      connectionStateMessage,
+    );
+  }
+
+  @override
   Future<void> invoke({
     required String methodName,
     List<String?>? args,

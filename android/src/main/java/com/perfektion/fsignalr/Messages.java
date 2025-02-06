@@ -1000,6 +1000,8 @@ public class Messages {
 
     void getConnectionId(@NonNull HubConnectionManagerIdMessage msg, @NonNull NullableResult<String> result);
 
+    void getConnectionState(@NonNull HubConnectionManagerIdMessage msg, @NonNull Result<HubConnectionStateMessage> result);
+
     void invoke(@NonNull InvokeHubMethodMessage msg, @NonNull VoidResult result);
 
     void setBaseUrl(@NonNull SetBaseUrlMessage msg, @NonNull VoidResult result);
@@ -1130,6 +1132,36 @@ public class Messages {
                     };
 
                 api.getConnectionId(msgArg, resultCallback);
+              });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BinaryMessenger.TaskQueue taskQueue = binaryMessenger.makeBackgroundTaskQueue();
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(
+                binaryMessenger, "dev.flutter.pigeon.fsignalr.HubConnectionManagerNativeApi.getConnectionState" + messageChannelSuffix, getCodec(), taskQueue);
+        if (api != null) {
+          channel.setMessageHandler(
+              (message, reply) -> {
+                ArrayList<Object> wrapped = new ArrayList<>();
+                ArrayList<Object> args = (ArrayList<Object>) message;
+                HubConnectionManagerIdMessage msgArg = (HubConnectionManagerIdMessage) args.get(0);
+                Result<HubConnectionStateMessage> resultCallback =
+                    new Result<HubConnectionStateMessage>() {
+                      public void success(HubConnectionStateMessage result) {
+                        wrapped.add(0, result);
+                        reply.reply(wrapped);
+                      }
+
+                      public void error(Throwable error) {
+                        ArrayList<Object> wrappedError = wrapError(error);
+                        reply.reply(wrappedError);
+                      }
+                    };
+
+                api.getConnectionState(msgArg, resultCallback);
               });
         } else {
           channel.setMessageHandler(null);

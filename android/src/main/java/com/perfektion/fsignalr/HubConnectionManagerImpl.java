@@ -282,6 +282,24 @@ public class HubConnectionManagerImpl implements HubConnectionManager {
     }
 
     @Override
+    public void getConnectionState(@NonNull Messages.Result<Messages.HubConnectionStateMessage> result) {
+        try {
+            logger.info("`getConnectionState` running on thread: "
+                    + Thread.currentThread().getName()
+                    + ", hubConnectionManagerId: " + id
+            );
+
+            final HubConnectionState state = hubConnection.getConnectionState();
+            logger.info("Hub connection state retrieved, hubConnectionManagerId: " + id);
+
+            result.success(mapToHubConnectionStateMessage(state));
+        } catch (Exception e) {
+            logger.error("Hub connection get connection state failed, hubConnectionManagerId: " + id, e);
+            result.error(e);
+        }
+    }
+
+    @Override
     public void invoke(@NonNull String methodName, @Nullable List<String> args, @NonNull VoidResult result) {
         try {
             logger.info("`invoke` running on thread: "

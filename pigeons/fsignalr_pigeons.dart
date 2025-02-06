@@ -141,6 +141,10 @@ abstract class HubConnectionManagerNativeApi {
 
   @async
   @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  HubConnectionStateMessage getConnectionState(HubConnectionManagerIdMessage msg);
+
+  @async
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   void invoke(InvokeHubMethodMessage msg);
 
   @async

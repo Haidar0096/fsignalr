@@ -82,6 +82,12 @@ abstract class FsignalrPlatformInterface extends PlatformInterface {
     throw UnimplementedError('getConnectionId() has not been implemented.');
   }
 
+  Future<HubConnectionState> getConnectionState({
+    required int hubConnectionManagerId,
+  }) {
+    throw UnimplementedError('getConnectionState() has not been implemented.');
+  }
+
   Future<void> invoke({
     required String methodName,
     List<String?>? args,
