@@ -69,7 +69,7 @@ class _MultiTabChatViewState extends State<MultiTabChatView> {
           if (loading)
             Positioned.fill(
               child: Container(
-                color: Colors.black.withOpacity(0.5),
+                color: Colors.black.withValues(alpha: 0.5),
                 child: const Center(child: CircularProgressIndicator()),
               ),
             ),
