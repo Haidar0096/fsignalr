@@ -38,6 +38,12 @@ flutter:
       android:
         package: com.perfektion.fsignalr
         pluginClass: FsignalrPlugin
+      macos:
+        pluginClass: FsignalrPlugin
+        sharedDarwinSource: true
+      ios:
+        pluginClass: FsignalrPlugin
+        sharedDarwinSource: true
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:
