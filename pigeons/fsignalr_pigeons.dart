@@ -8,7 +8,7 @@ import 'package:pigeon/pigeon.dart';
       package: 'com.perfektion.fsignalr',
       className: 'Messages',
     ),
-    swiftOut: 'darwin/Classes/Messages.swift',
+    swiftOut: 'darwin/fsignalr/Sources/fsignalr/Messages.swift',
   ),
 )
 // Below is the classes and contracts that define the communication between

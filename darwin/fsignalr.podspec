@@ -10,17 +10,12 @@ Pod::Spec.new do |s|
 Signalr plugin for Flutter on MacOS and iOS.
                        DESC
   s.homepage         = 'https://github.com/haidar0096/fsignalr'
-  s.license          = { :file => '../LICENSE' }
+  s.license          = { :type => 'BSD-3-Clause', :file => '../LICENSE' }
   s.author           = { 'Haidar Mehsen' => 'contact.hmehsen@gmail.com' }
 
-  s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
-
-  # If your plugin requires a privacy manifest, for example if it collects user
-  # data, update the PrivacyInfo.xcprivacy file to describe your plugin's
-  # privacy impact, and then uncomment this line. For more information,
-  # see https://developer.apple.com/documentation/bundleresources/privacy_manifest_files
-  # s.resource_bundles = {'fsignalr_privacy' => ['Resources/PrivacyInfo.xcprivacy']}
+  s.source = { :git => "https://github.com/Haidar0096/fsignalr.git", :tag => s.version.to_s }
+  s.source_files = 'fsignalr/Sources/fsignalr/**/*.swift'
+  s.resource_bundles = {'fsignalr_privacy' => ['fsignalr/Sources/fsignalr/PrivacyInfo.xcprivacy']}
 
   s.dependency 'FlutterMacOS'
 
