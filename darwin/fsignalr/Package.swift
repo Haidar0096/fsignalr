@@ -12,11 +12,15 @@ let package = Package(
     products: [
         .library(name: "fsignalr", targets: ["fsignalr"])
     ],
-    dependencies: [],
+    dependencies: [
+        .package(url: "https://github.com/dotnet/signalr-client-swift", branch: "main")
+    ],
     targets: [
         .target(
             name: "fsignalr",
-            dependencies: [],
+            dependencies: [
+                .product(name: "SignalRClient", package: "signalr-client-swift")
+            ],
             resources: [
                 // TODO: If your plugin requires a privacy manifest
                 // (e.g. if it uses any required reason APIs), update the PrivacyInfo.xcprivacy file
