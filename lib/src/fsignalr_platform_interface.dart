@@ -24,7 +24,8 @@ enum HubConnectionState {
   disconnected;
 
   static HubConnectionState fromHubConnectionStateMessage(
-          HubConnectionStateMessage msg) =>
+    HubConnectionStateMessage msg,
+  ) =>
       switch (msg) {
         HubConnectionStateMessage.connected => HubConnectionState.connected,
         HubConnectionStateMessage.connecting => HubConnectionState.connecting,
@@ -69,12 +70,22 @@ abstract class FsignalrPlatformInterface extends PlatformInterface {
     );
   }
 
-  Future<void> startHubConnection({required int hubConnectionManagerId}) {
+  Future<String> startHubConnection({required int hubConnectionManagerId}) {
     throw UnimplementedError('startHubConnection() has not been implemented.');
   }
 
   Future<void> stopHubConnection({required int hubConnectionManagerId}) {
     throw UnimplementedError('stopHubConnection() has not been implemented.');
+  }
+
+  Future<String?> getConnectionId({required int hubConnectionManagerId}) {
+    throw UnimplementedError('getConnectionId() has not been implemented.');
+  }
+
+  Future<HubConnectionState> getConnectionState({
+    required int hubConnectionManagerId,
+  }) {
+    throw UnimplementedError('getConnectionState() has not been implemented.');
   }
 
   Future<void> invoke({

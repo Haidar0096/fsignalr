@@ -1,4 +1,4 @@
-library fsignalr;
+library;
 
 export 'src/fsignalr_platform_interface.dart'
     show TransportType, HubConnectionState, HandledHubMethod;

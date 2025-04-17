@@ -27,3 +27,10 @@ migrate_working_dir/
 **/doc/api/
 .dart_tool/
 build/
+
+# FVM Version Cache
+.fvm/
+
+# Misc
+/darwin/fsignalr/.swiftpm/
+**/.cxx/**

@@ -59,7 +59,10 @@ public class HubConnectionManagerImpl implements HubConnectionManager {
             FlutterPlugin.FlutterPluginBinding flutterPluginBinding,
             long hubConnectionManagerId
     ) {
-        logger.info("`HubConnectionManagerImpl` constructor running on thread: " + Thread.currentThread().getName() + ", id: " + hubConnectionManagerId);
+        logger.info("`HubConnectionManagerImpl` constructor running on thread: "
+                + Thread.currentThread().getName()
+                + ", hubConnectionManagerId: " + hubConnectionManagerId
+        );
 
         HttpHubConnectionBuilder hubConnectionBuilder = HubConnectionBuilder.create(msg.getBaseUrl())
                 .withTransport(mapToTransportEnum(msg.getTransportType()))
@@ -88,7 +91,7 @@ public class HubConnectionManagerImpl implements HubConnectionManager {
 
         logger.info(
                 "Hub connection created" +
-                        ", id: " + id
+                        ", hubConnectionManagerId: " + id
                         + ", baseUrl: "
                         + msg.getBaseUrl()
                         + ", transportType: "
@@ -216,21 +219,25 @@ public class HubConnectionManagerImpl implements HubConnectionManager {
     }
 
     @Override
-    public void startHubConnection(@NonNull VoidResult result) {
+    public void startHubConnection(@NonNull Messages.Result<String> result) {
         try {
-            logger.info("`startHubConnection` running on thread: " + Thread.currentThread().getName() + ", id: " + id);
+            logger.info("`startHubConnection` running on thread: "
+                    + Thread.currentThread().getName()
+                    + ", hubConnectionManagerId: " + id
+            );
 
             sendHubConnectionStateChangedFlutterMessage(HubConnectionState.CONNECTING);
 
             hubConnection.start().blockingAwait();
-            logger.info("Hub connection started, id: " + id);
+            final String hubConnectionId = hubConnection.getConnectionId();
+            logger.info("Hub connection started, hubConnectionManagerId: " + id);
 
             sendHubConnectionStateChangedFlutterMessage();
 
-            result.success();
+            result.success(hubConnectionId);
         } catch (Exception e) {
             sendHubConnectionStateChangedFlutterMessage();
-            logger.error("Hub connection start failed, id: " + id, e);
+            logger.error("Hub connection start failed, hubConnectionManagerId: " + id, e);
             result.error(e);
         }
     }
@@ -238,17 +245,56 @@ public class HubConnectionManagerImpl implements HubConnectionManager {
     @Override
     public void stopHubConnection(@NonNull VoidResult result) {
         try {
-            logger.info("`stopHubConnection` running on thread: " + Thread.currentThread().getName() + ", id: " + id);
+            logger.info("`stopHubConnection` running on thread: "
+                    + Thread.currentThread().getName()
+                    + ", hubConnectionManagerId: " + id
+            );
 
             hubConnection.stop().blockingAwait();
-            logger.info("Hub connection stopped, id: " + id);
+            logger.info("Hub connection stopped, hubConnectionManagerId: " + id);
 
             sendHubConnectionStateChangedFlutterMessage();
 
             result.success();
         } catch (Exception e) {
             sendHubConnectionStateChangedFlutterMessage();
-            logger.error("Hub connection stop failed, id: " + id, e);
+            logger.error("Hub connection stop failed, hubConnectionManagerId: " + id, e);
+            result.error(e);
+        }
+    }
+
+    @Override
+    public void getConnectionId(@NonNull Messages.NullableResult<String> result) {
+        try {
+            logger.info("`getConnectionId` running on thread: "
+                    + Thread.currentThread().getName()
+                    + ", hubConnectionManagerId: " + id
+            );
+
+            final String connectionId = hubConnection.getConnectionId();
+            logger.info("Hub connection id retrieved, hubConnectionManagerId: " + id);
+
+            result.success(connectionId);
+        } catch (Exception e) {
+            logger.error("Hub connection get connection id failed, hubConnectionManagerId: " + id, e);
+            result.error(e);
+        }
+    }
+
+    @Override
+    public void getConnectionState(@NonNull Messages.Result<Messages.HubConnectionStateMessage> result) {
+        try {
+            logger.info("`getConnectionState` running on thread: "
+                    + Thread.currentThread().getName()
+                    + ", hubConnectionManagerId: " + id
+            );
+
+            final HubConnectionState state = hubConnection.getConnectionState();
+            logger.info("Hub connection state retrieved, hubConnectionManagerId: " + id);
+
+            result.success(mapToHubConnectionStateMessage(state));
+        } catch (Exception e) {
+            logger.error("Hub connection get connection state failed, hubConnectionManagerId: " + id, e);
             result.error(e);
         }
     }
@@ -256,7 +302,11 @@ public class HubConnectionManagerImpl implements HubConnectionManager {
     @Override
     public void invoke(@NonNull String methodName, @Nullable List<String> args, @NonNull VoidResult result) {
         try {
-            logger.info("`invoke` running on thread: " + Thread.currentThread().getName() + ", id: " + id);
+            logger.info("`invoke` running on thread: "
+                    + Thread.currentThread().getName()
+                    + ", hubConnectionManagerId: "
+                    + id
+            );
 
             // create the varargs object array
             if (args != null) {
@@ -269,14 +319,14 @@ public class HubConnectionManagerImpl implements HubConnectionManager {
 
 
             logger.info(
-                    "Hub connection invoked, id: "
+                    "Hub connection invoked, hubConnectionManagerId: "
                             + id
                             + ", method: "
                             + methodName
             );
             result.success();
         } catch (Exception e) {
-            logger.error("Hub connection invoke failed, id: " + id, e);
+            logger.error("Hub connection invoke failed, hubConnectionManagerId: " + id, e);
             result.error(e);
         }
     }
@@ -284,33 +334,50 @@ public class HubConnectionManagerImpl implements HubConnectionManager {
     @Override
     public void setBaseUrl(@NonNull String baseUrl, @NonNull VoidResult result) {
         try {
-            logger.info("`setBaseUrl` running on thread: " + Thread.currentThread().getName() + ", id: " + id);
+            logger.info("`setBaseUrl` running on thread: "
+                    + Thread.currentThread().getName()
+                    + ", hubConnectionManagerId: "
+                    + id
+            );
 
             hubConnection.setBaseUrl(baseUrl);
-            logger.info("Hub connection base url set, id: " + id);
+            logger.info("Hub connection base url set, hubConnectionManagerId: " + id);
 
             result.success();
         } catch (Exception e) {
-            logger.error("Hub connection set base url failed, id: " + id, e);
+            logger.error("Hub connection set base url failed, hubConnectionManagerId: " + id, e);
             result.error(e);
         }
     }
 
     @Override
-    public void dispose(@NonNull VoidResult result) {
+    public void dispose(VoidResult result) {
         try {
-            logger.info("`dispose` running on thread: " + Thread.currentThread().getName() + ", id: " + id);
+            logger.info("`dispose` running on thread: "
+                    + Thread.currentThread().getName()
+                    + ", hubConnectionManagerId: "
+                    + id
+            );
 
             hubConnection.close();
-            logger.info("Hub connection disposed, id: " + id);
+            logger.info("Hub connection disposed, hubConnectionManagerId: " + id);
 
             flutterHubMethodsHandlersSubscriptions.forEach(Subscription::unsubscribe);
             flutterHubMethodsHandlersSubscriptions.clear();
 
-            result.success();
+            if (result != null) {
+                result.success();
+            }
         } catch (Exception e) {
-            logger.error("Hub connection dispose failed, id: " + id, e);
-            result.error(e);
+            logger.error("Hub connection dispose failed, hubConnectionManagerId: " + id, e);
+            if (result != null) {
+                result.error(e);
+            }
         }
+    }
+
+    @Override
+    public void dispose() {
+        dispose(null);
     }
 }

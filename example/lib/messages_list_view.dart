@@ -8,6 +8,7 @@ class MessagesListView extends StatelessWidget {
   final List<Message> messages;
   final Color backgroundColor;
   final String hubName;
+  final String connectionId;
   final HubConnectionState connectionState;
   final void Function()? onReloadIconPressed;
 
@@ -16,6 +17,7 @@ class MessagesListView extends StatelessWidget {
     required this.messages,
     this.backgroundColor = Colors.white,
     required this.hubName,
+    required this.connectionId,
     required this.connectionState,
     this.onReloadIconPressed,
   });
@@ -43,7 +45,13 @@ class MessagesListView extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 padding: const EdgeInsets.all(8.0),
-                child: Text('$hubName: $connectionState'),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('$hubName: $connectionState'),
+                    Text('Connection Id: $connectionId'),
+                  ],
+                ),
               ),
             ),
             Align(
