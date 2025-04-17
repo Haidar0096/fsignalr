@@ -18,5 +18,7 @@ public interface HubConnectionManager {
 
     void setBaseUrl(@NonNull String baseUrl, @NonNull Messages.VoidResult result);
 
-    void dispose(@NonNull Messages.VoidResult result);
+    void dispose(Messages.VoidResult result);
+
+    void dispose();
 }

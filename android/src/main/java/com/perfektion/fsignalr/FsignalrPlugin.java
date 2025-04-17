@@ -34,6 +34,7 @@ public class FsignalrPlugin implements FlutterPlugin, Messages.HubConnectionMana
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
         Messages.HubConnectionManagerNativeApi.setUp(binding.getBinaryMessenger(), null);
         this.flutterPluginBinding = null;
+        clearResources();
     }
 
     @Override
@@ -148,5 +149,14 @@ public class FsignalrPlugin implements FlutterPlugin, Messages.HubConnectionMana
 
         hubConnectionManager.dispose(result);
         hubConnectionManagers.remove(id);
+    }
+
+    private void clearResources() {
+        for (var entry : hubConnectionManagers.entrySet()) {
+            entry.getValue().dispose();
+        }
+        hubConnectionManagers.clear();
+        nextHubConnectionManagerCreationId = 1;
+        logger.info("Disposed all hub connection managers");
     }
 }

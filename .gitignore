@@ -31,5 +31,5 @@ build/
 # FVM Version Cache
 .fvm/
 
-# Misc
 /darwin/fsignalr/.swiftpm/
+**/.cxx/**
