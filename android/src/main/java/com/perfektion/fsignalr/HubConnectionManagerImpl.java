@@ -351,7 +351,7 @@ public class HubConnectionManagerImpl implements HubConnectionManager {
     }
 
     @Override
-    public void dispose(@NonNull VoidResult result) {
+    public void dispose(VoidResult result) {
         try {
             logger.info("`dispose` running on thread: "
                     + Thread.currentThread().getName()
@@ -365,10 +365,19 @@ public class HubConnectionManagerImpl implements HubConnectionManager {
             flutterHubMethodsHandlersSubscriptions.forEach(Subscription::unsubscribe);
             flutterHubMethodsHandlersSubscriptions.clear();
 
-            result.success();
+            if (result != null) {
+                result.success();
+            }
         } catch (Exception e) {
             logger.error("Hub connection dispose failed, hubConnectionManagerId: " + id, e);
-            result.error(e);
+            if (result != null) {
+                result.error(e);
+            }
         }
+    }
+
+    @Override
+    public void dispose() {
+        dispose(null);
     }
 }
